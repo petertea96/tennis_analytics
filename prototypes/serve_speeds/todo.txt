@@ -1,0 +1,4 @@
+To do list
+
+- Add function that calculates set up / set down / set even
+Idea is that we can gauge pressure level using sets info
