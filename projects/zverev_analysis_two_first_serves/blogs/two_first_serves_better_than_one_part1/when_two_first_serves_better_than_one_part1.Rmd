@@ -1,0 +1,168 @@
+---
+title: "When Two First Serves are Better Than One"
+subtitle: "Part I: Justification of a Riskier Strategy"
+author: "Stats on the T"
+date: "June 14, 2020"
+output:
+  html_document:
+  keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+First serves are typically hit with the most potential to win immediate service points. They are powerful and sometimes erratic, but the server is assured that even if botched there would still be a second opportunity to begin the point. Second serves on the other hand do not have the luxury of an extra serve safety net and consequently are delivered with more caution. The trade-offs of power and consistency must be carefully weighed, since too much of one source may completely tip the balance of the service game. For instance, we might think that if the extra speed characterized in typical first serves have a higher potential to win points, would it benefit players to just ``serve fast all the time``?  
+
+## 
+
+In fact, this question has already been addressed by [fiverthirtyeight](https://fivethirtyeight.com/features/why-tennis-players-dont-take-more-risks-on-second-serves/), and the answer is a discernable ``No``. For the average ATP player, hitting two first serves (i.e. hitting a second serve that mimics the first serve in intensity and risk level) compared to the conventional 1st serve - 2nd serve punch does not offer an increase in expected service points won. This is because while first serves are more explosive and difficult for the returner to defuse, they are almost equally as challenging for the server to accurately land in the service box; in fact, only about 60-70% of first serves land in. 
+
+### An Optimal Serve Strategy
+
+To make things more concrete, let's consider the underlying mathematics behind a *two-first-serve strategy*.
+
+
+The optimal strategy for players comes down to maximizing their chance of winning a point on serve. Let's call this $w$. To break $w$ down we need a few more quantities. From Bayes' Theorem, these are the conditional chance of winning on first serve given that it lands in, $w_1 = Prob(Win | \mbox{1st Serve In})$, and the chance of landing it in, $p_1 = Prob(\mbox{1st Serve In})$. Let $w_2$ and $p_2$ be the corresponding probabilities on the second serve. 
+
+Using Total Probability Rule, a player's utility function when serving is then,
+
+$$
+w = w_1 * p_1  + (1 - p_1) * p_2 * w_2
+$$
+
+From this, we can now see what would need to happen for a two-first-serve strategy to be advantageous. We simply substitute $w_1$ and $p_1$ for the second serve parameters, 
+
+$$
+w_1 * p_1  + (1 - p_1) * p_1 * w_1 \geq w_1 * p_1  + (1 - p_1) * p_2 * w_2
+$$
+
+After some arranging, we see that this implies
+
+$$
+w_1 / w_2 \geq p_2 / p_1
+$$
+
+which means that this strategy is only better when the probability of winning a point conditional on the first serve landing in relative to the second serve exceeds the  probability of landing the second serve in relative to the first serve. 
+
+The norm in tennis is for the accuracy on second serve to far exceed that on first serve, that is, $p_2 >> p_1$. Conversely, while the conditional chance of winning on first serve is higher than that on second serve, it usually is not as massive of a relative difference. 
+
+So, when might a player go with the two-first-serve strategy? Well, it would have to be a case where those usual patterns are out of whack. This could happen, for example, if a player's second serve quality was so poor, either by being very ineffective and/or by being high risk. You can see this in the grid of possible second serve characteristics for a server with fixed first serve properties. Turning down the dial on the conditional win chance on second serve or the accuracy of the second serve can both lead to an advantageous two-first-serve strategy.
+
+##
+
+```{r two_first_Serves_setup, echo = FALSE, message = FALSE, warning = FALSE}
+library(ggplot2)
+library(dplyr)
+
+params <- expand.grid(
+	w_1 = 0.75,
+	w_2 = seq(0.2, 0.98, by = 0.01),
+	p_1 = 0.6,
+	p_2 = seq(0.5, 0.98, by = 0.01)
+)
+
+params <- params %>%
+	dplyr::mutate(
+		odds = w_1 / w_2 - p_2 / p_1
+	)
+	
+params %>%
+	ggplot(aes(y = w_2, x = p_2, fill = odds))	+
+	geom_tile(col = "grey") +
+	scale_fill_gradient2("Two-First Serve Relative Advantage", low = "red", mid = "white", high = "blue", breaks = -3:3, limits = c(-3, 3)) + 
+	theme_bw() +
+	scale_y_continuous("Prob(Win | 2nd Serve In)") +
+	scale_x_continuous("Prob(2nd Serve In)") +
+	ggtitle("Prob(Win | 1st Serve In) = 75% and Prob(1st Serve In) = 60%") +
+	theme(legend.position = "bottom")
+
+```
+
+*Fig. 1: When two first serves are better than one. Blue regions highlight areas where the risky strategy offers benefit while red regions highlight areas with detrimental effects.*
+
+
+### 2019 ATP Serve Analysis
+
+With these ideas in mind, lets look at the second serve characteristics among the top 100 ranked ATP players by the end of the 2019 season. Following [fiverthirtyeight's](https://fivethirtyeight.com/features/why-tennis-players-dont-take-more-risks-on-second-serves/) analysis, we can identify players who might consider the two-first-serve strategy.
+
+
+<img src="plots/atp_2019_two_first_serves.png" alt="a_risky_serve_plot" width="575" height="425"/>
+
+<br>
+
+*Fig. 2: Comparison of observed win probability on 2nd serve to the win probability "if 2nd serves were hit like a 1st serve".*
+
+
+Most players fall comfortably below the hashed line, meaning that this precarious strategy would not have boosted the $Prob(\mbox{Win on 2nd Serve})$ for a conglomerate of players. There are, however, 4 competitors for which this strategy appears to offer some tangible benefit: the most prominent name being ``Alexander Zverev``. Unlike Zverev's contemporaries who would mostly be dinged with an expected decrease in their $Prob(\mbox{Win on 2nd Serve})$, Zverev is sitting on a whopping 4.4% expected increase.
+
+
+### Zverev's Serve Elements
+
+What gives? What makes Zverev so different from the rest? As alluded in the mathematical setup, Zverev's two-first-serve advantage can be explained with a combination of two artifacts: his relative elite performance on first serve countered with his lackluster performance on second serve. To illustrate, lets compare his 2019 performance against the top ATP field. 
+
+##
+
+Starting with first serve, Zverev is highly competitive compared to his top ATP fellows.
+
+##
+
+<img src="plots/first_serve_percentiles.jpeg" alt="first_Serve_performances"/>
+
+<br>
+
+*Fig. 3: First serve performances for the top ATP players of 2019.*
+
+<br>
+
+When his 1st serve landed in, Zverev was among the best in finishing off the point as evident with his comparable $Prob(\mbox{Win | 1st Serve In})$ to the other notable players. Further strengthening his performance on first serve was his ``exceptional`` $Prob(\mbox{1st Serve In})$, which ranked highest among the best players at a shade above 67%. These components together indicate that not only was Zverev dominant when his first serve landed in, but he was also extremely efficient at getting those first serves in.
+
+##
+
+Things however take an interesting turn for Zverev when looking at his second serve performance. 
+
+<br>
+
+<img src="plots/second_serve_percentiles.jpeg" alt="second_serve_performances"/>
+
+<br>
+
+*Fig. 4: Second serve performances for the top ATP players of 2019.*
+
+<br>
+
+In terms of $Prob(\mbox{Win | 2nd Serve In})$, there is some separation between the big 3 and the remaining top players. However, Zverev's performance in this category appears to be at least as competitive with the second tier of notable ATP stars which suggests that he was capable at closing on 2nd serve. The main concern was getting those 2nd serves in play. As it stood, Zverev averaged a sub 80% accuracy at getting his 2nd serves in: a huge drop-off from the typical accuracy among the top players. What's even more shocking is that Zverev's accuracy on 2nd serve surpassed only Alexander Zublik, if we compared him to the larger pool of the top 100 ranked players.
+
+##
+
+
+Zverev, while sporting an average 47% overall win percentage on his 2nd serve, was ranked last among his ATP peers. This marks a stark difference from his overall first serve win performance, where he was ranked concordantly with the title contending players on tour.
+
+<br>
+
+<img src="plots/overall_serve_percentiles.jpeg" alt="overall_serve_performances"/>
+
+<br>
+
+*Fig. 5: Overall serve performances for the top ATP players of 2019.*
+
+<br>
+
+##
+
+The frailty of Zverev's second serve marksmanship was the impetus in tanking his overall second serve performance and is why we see such a significant drop-off from his stellar first serve performance. In fact, the 2019 season for Zverev was marred with double faults - but that's a story we'll save for Part II. 
+
+
+
+### Two First Serves Instead of One?
+
+Would Zverev's vulnerable performance on 2nd serve justify the high-risk two-first-serves tactic? Zverev's serve results indicate that he is more comfortable on 1st than on 2nd serve. If Zverev had used the riskier approach in 2019 he would have hypothetically bumped his second serve win probability from 47% to 51%, which would have had him claim over half of his 2nd service points.
+
+##
+
+But perhaps a simpler and better solution for Zverev would instead be to clean his $Prob(\mbox{2nd Serve In)}$, which will increase his overall win probability on second serve. He's already capable at winning 2nd serve points when they land in; the issue is in getting those serves in, in the first place. A simple approach may be more feasible in the practical sense of improving Zverev's second serve. Crunching the numbers, an improvement from 80% to 87% in $Prob(\mbox{2nd Serve In})$ would have Zverev in equilibrium with the two-first-serves approach. By the way the average $Prob(\mbox{2nd Serve In})$ in 2019 among ATP players was registered at 89%, so even an average accuracy would pay major dividends for Zverev's second serve.
+
+
+##
+
+Despite the purported improvements from two first serves, it is unclear what the practical effects of this aggressive second serve strategy are and how one would navigate possible psychological or physical baggage brought upon with such a drastic tactical change. For example, the returner may adjust to the serves more readily with increased repetitions or there may be an increased fatigue level from going all out on every serve. While there may be some extra added comfort level in repeating the same rhythmic serve motions, it is questionable if we'd get the same result with each consecutive serve. What is clear though is that most elite players have a consistent second serve in their arsenal, but Zverev for the moment appears unequipped with such a reliable weapon.

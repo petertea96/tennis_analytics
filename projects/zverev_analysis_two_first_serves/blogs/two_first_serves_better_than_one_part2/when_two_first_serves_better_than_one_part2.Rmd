@@ -1,0 +1,177 @@
+---
+title: "When Two First Serves are Better Than One - Part 2"
+author: "Stats on the T"
+date: "June 25, 2020"
+output:
+  html_document:
+  keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Previously on Part I of our *When Two First Serves are Better Than One* series, we saw that 2019 Zverev was an auspicious candidate for a riskier 2nd serve. This observation was largely attributed to his dual nature on serve - flourishing on 1st but withering on 2nd.
+Could it be that the 2019 season was simply an anomaly for Zverev's 2nd serve? Or were there signs of an impending tumble? In part II, we investigate factors that may underlie Zverev's splitting performance on serve.
+
+
+
+
+### In Memoriam of Zverev's Serve
+
+You would be hard pressed to find a top 10 player in recent memory with a comparably grim 2nd serve as Zverev - especially in his proclivity to double faulting. In fact, the frailty of Zverev's second serve marksmanship was the impetus in tanking his overall 2nd serve and is why we saw such a disappointing drop-off from his stellar 1st serve performance. The 2019 season for Zverev was mired in double faults, and even culminated with a [career high 20 double faults](https://www.atptour.com/en/news/zverev-kecmanovic-cincinnati-2019-wednesday) recorded in his Cincinnati Open match loss against 59th ranked Kecmanovic. It proved exceedingly difficult to win 2nd serve points when self-inflicting over 0.2 double faults per second serve (or 1 double fault for every 5 second serve attempts) over the entirety of a season. 
+
+##
+
+If we look all the way back to 2015, a time when Zverev significantly rose up the ATP rankings, his 2019 season on 2nd serve was undoubtedly his *worst*. Indeed, 2019 saw a dramatic decline with career lows set in $Prob(\mbox{2nd Serve In})$ and overall $Prob(\mbox{Win on 2nd serve})$. Although his $Prob(\mbox{Win | 2nd Serve In})$ did not diminish as significantly, it was still nowhere near high enough to compensate for his poor accuracy and ultimately unable to salvage his overall 2nd serve. 
+
+##
+
+```{r, plotly_code2, echo=FALSE}
+knitr::include_url('./plots_part2/zverev_history_2nd.html', height = "450px") 
+```
+
+<br>
+
+*Fig. 1: Zverev's career 2nd serve trends.*
+
+##
+
+While his 2nd serve was distressing, it was a completely different story on his 1st serve. In 2019, Zverev set career highs in $Prob(\mbox{1st Serve In})$ and $Prob(\mbox{Win on 1st Serve})$. What's more, his 1st serve has shown an impressively consistent improvement since stepping onto the tour and is apparently working overtime to compensate for his 2nd serve handicap. 
+
+##
+
+```{r, plotly_code3, echo=FALSE}
+knitr::include_url('./plots_part2/zverev_history_1st.html', height = "450px") 
+```
+
+<br>
+
+*Fig. 2:  Zverev's career 1st serve trends.*
+
+##
+
+So far, it does appear that Zverev's 2nd serve accuracy weakened as we transitioned from 2018 towards 2019. Zooming more closely into this timeframe, we can look at the trajectory of his 2nd serve accuracy and get a better glimpse at *when* these 2nd serve struggles may have manifested. 
+
+##
+
+At the beginning of 2018, Zverev had demonstrated remarkable 2nd serve accuracy. This stretch featured an impressive showing at the 2018 Madrid Open (highlighted in red on Fig. 3) where Zverev played out of his mind. En route to the championship, Zverev won 5 matches - all in straight sets, which included bouts against Isner (QF), Shapovalov (SF) and Thiem (F). Perhaps a more impressive feat was the dominant way Zverev won these matches: only one recorded double fault (against Shapovalov) and a single break point faced in the 3rd round (which he later saved). An exemplary performance for any tennis player, this run can easily remind us of Zverev's special potential.
+
+
+##
+
+Unfortunately, his exceptional 2nd serve accuracy would not be sustained and soon followed a swirling decline. From August 2018 onwards, cracks began emerging in Zverev's 2nd serve accuracy. These cracks ultimately fractured through to the 2019 season and eventually ruptured into some career-low sub 0.6 $Prob(\mbox{2nd Serve In})$, which included matches at the Rogers Cup and Cincinnati Open. The beginning of 2018 characterized an optimistically stable 2nd serve accuracy but as we gingerly stepped towards its later stages and into 2019, the trend of his 2nd serve marksmanship warped into something alarmingly inconsistent.
+
+##
+
+```{r, plotly_code, echo=FALSE}
+knitr::include_url('./plots_part2/zverev_recent_2ndin.html', height = "450px") 
+```
+
+<br>
+
+*Fig. 3: A glimpse at Zverev's Prob(2nd serve in) since 2018. A median filter with window size of 5 steps was applied to help remove noise in observed performances. Shaded areas represent one standard deviation above and below the median within the window of calculation. Red box highlights Zverev's performance at the 2018 Madrid Open.*
+
+<br>
+
+And while he has shown glimpses of improving his 2nd serve accuracy prior to the COVID-19 disruption, especially at the 2020 Australian Open where he averaged just over 1 double fault for every 10 second serve attempts, his contiguous performances during the ATP Cup and Mexican Open in Acapulco paints a familiar, turbulent 2nd serve inaccuracy behaviour. In the aggregate of 11 recorded matches in 2020 (not including the recent Adria Tour debacle), Zverev was averaging a subpar *1 double fault per 4 second serve attempts* while the remaining ATP field was averaging about *1 double fault per 10 second serve attempts* (a rate respectably synonymous with Zverev's isolated 2020 Australian Open run).
+
+##
+
+On a positive note his 1st serve performance, especially in $Prob(\mbox{1st Serve In})$, continues to rise which allows Zverev to more comfortably and confidently play a higher level of tennis on his 1st serve, rather than being exploited on his shakier 2nd serve. However, on a more cautionary note Zverev's continual increase in $Prob(\mbox{1st Serve In})$ might eventually lead to a limited - or even reduced - return value in his $Prob(\mbox{Win | 1st Serve In})$. A serve likely becomes more predictable as a by-product of its efficiency and, like a seesaw, as one goes up the other *eventually* comes down. So, while Zverev has been steadily increasing in both 1st serve categories, he is likely to plateau in his overall 1st serve performance. 
+
+
+## What's New in Zverev's serve?
+
+Given the clear distinction between Zverev's 1st serve compared to that of his 2nd serve, a natural follow-up is to probe what may be underlying his serve outcomes, especially as it may relate to managing serve risk. 
+
+##
+
+
+We consider the current score on serve to explore pressure situational effects that may be influencing his serve risk tolerance. Then, we look at serve speeds as a possible measure linked with the physical execution of the serve. Both score and speed data were obtained in play-by-play format for grand slam matches on [Jeff Sackmann's repos](https://github.com/JeffSackmann/tennis_atp). Before moving to the analysis, we should note that the grand slams represent only a subset of matches played in a year. While they provide some useful information, they are not necessarily a representative sample of Zverev's entire body of work. For example, in 2019 the grand slams only accounted for 20% of his matches played that season.
+
+
+### Serve Risk Rates
+
+To assess serve risk tolerance on different pressure score situations, we compared Zverev's rate of double faults to his rate of aces hit. Inherently, taking more risk on serve should increase both the rate of double faults and aces, while taking less risk should reduce these serve rates.
+
+To simplify our comparisons, we amalgamated scores into 6 groups demarcated based on their impact and contextual meaning. The groupings, inspired by [Tennis Analytics](https://www.tennisanalytics.net/), are as follows:
+
+* Break Point: Score where Zverev is on brink of having serve broken. Ex: 40 - AD, 30 - 40, 4 - 6, etc
+
+* Game Point: Score where Zverev has the opportunity to serve for the game. Ex: AD - 40, 40 -0, 6-4, etc 
+
+* First Point: First serve of each game
+
+* Behind: Score where Zverev is trailing, but not including break points. Ex: 0 - 15,  15 - 30, 2 - 4, etc
+
+* Ahead: Score where Zverev is leading, but not including game points. Ex: 15 - 0,  30 - 15, 4 - 2, etc
+
+* Even: Tied score, but not including first points. Ex: 15 - 15, 30 - 30, 3 - 3, etc
+
+
+##
+
+With this grouping scheme, we don't necessarily get equal sample sizes across groups. For example, in 2019 Zverev had faced only 150 grand slam *break points* compared to a relatively larger 422 *ahead points*. The notion of a *sufficient sample size* is not clear, however we present our cautious note for transparency of our chosen methodology.
+
+##
+
+
+Consistently, Zverev's double fault rate increased across all 6 categories from 2018 compared to 2019. Interestingly, his highest double fault rate of 0.12 occurred on breakpoints: about 1 double fault for every 8 second serve attempts, which automatically conceded the service game to his opponent. What's more, Zverev also had a relatively large increase in his double fault rate when  facing game point.
+
+<br>
+<img src="plots_part2/zverev_df_rate.png" alt="zverev_serve_double_fault_rates"/>
+<br>
+
+*Fig. 4: Zverev's 2018 and 2019 double fault rates at the grand slams.*
+ 
+##
+
+An increase in double fault rates could simply mean that Zverev was systematically choosing more risk on his serve. If Zverev was indeed generally using riskier serves, we would expect an increase in not only his double fault rates but his ace rates too. Interestingly, what we observe is that his ace rates did not resoundingly increase across all 6 categories, as we saw previously for his double fault rates. For example, on break point we see only a modest increase from 0.062 to 0.073 in the rate of aces hit. Really, it is only in the *ahead* and *even* points where we see clear increases in the rate of aces hit. 
+
+<br>
+<img src="plots_part2/zverev_ace_rate.png" alt="zverev_serve_ace_rates"/>
+<br>
+
+*Fig. 5: Zverev's 2018 and 2019 ace rates at the grand slams.*
+
+##
+
+What can we take away from these plots, and how do they describe Zverev's management of serve risk? Well, when Zverev is ahead or at least even in the service game, there is a reasonable tendency to take more risks on serve and hit a higher rate of aces. But when he's behind, and especially when on the verge of being broken, Zverev takes considerably much less risk as evident with his relatively lower ace rate. Also, during these high-pressure scores if he faults and is boxed into his second serve, then he has a dangerously high risk of double faulting.  
+
+
+### Serve Speeds
+
+Simply looking at rates of double faults or aces is somewhat limited as it does not directly describe the *intention* behind Zverev's serves. To investigate Zverev's serve process rather than his mere serve outcomes, we shift our focus now onto serve speeds. We looked only at the Australian Open (AO) campaign to limit tournament-specific speed measurement bias and because the AO provided the cleanest serve speed data among the grand slam tournaments. 
+
+##
+
+At first glance, Zverev's speed distribution on 1st serve is consistently much faster than that on 2nd serve. His average 1st serve speed at the AO increased from 202 KM/H to 206 KM/H in 2018 to 2019, respectively: by contrast his average 2nd serve speed remained stagnant at an average of 167 KM/H. Unsurprisingly, most of his aces hit came off of his electric 1st serve.
+
+##
+
+Combining serve speed with score situation, we found that his 2nd serve speed was particularly slow when behind in the service game and especially when facing break point.
+This finding is likely not unique to Zverev, as break points are arguably the most uncomfortable points to serve free-flowingly in a match - particularly on 2nd serve. Nonetheless, it does corroborate our previous proposition that Zverev did not have much of an appetite for extra serve risk when falling behind in the service game. These visual findings are also consistent across the other 3 grand slams, [which you can view here.](https://ptea.shinyapps.io/shiny/)
+
+##
+
+
+
+<br>
+
+<img src="plots_part2/zverev_speed_boxplot.png" alt="Zverev_serve_speeds"/>
+
+<br>
+
+*Fig. 6: Boxplots of Zverev's observed serve speed distributions on first and second serve at the Australian Open in 2018 and 2019. Horizontal dashed line represents Zverev's average 2nd serve speed at these venues (167 KM/H). Red dots in either box pairs represent recorded ace speeds. Blue dots in the second serve boxes represent recorded double fault speeds. Unfortunately, (single) fault speeds were not recorded. *
+
+
+##
+
+On a final note about serve speeds, we also looked at speeds where Zverev recorded aces (red dots) and double faults (blue dots). Our initial hypothesis was that if extremely high or low serve speeds by nature represent a deviation from the norm, then these outlying speeds may be more susceptible to an ace or double fault. But what we observe is that most ace and double fault speeds do not stray too far away from the center of each plotted distribution. Other factors, such as returner position and skill may more strongly influence these serve outcomes than mere serve speed in isolation.
+
+<br>
+
+
+2019 had some interesting 2nd serve performances from Zverev. What's astounding is that despite having to haul a declining 2nd serve for an entire season, Zverev was still able to consistently maintain a top 7 ATP ranking and hasn't fallen out of this position since mid 2017. At age 23 there is of course still plenty of time to grow, but until he fosters a reliable second serve we may only ever marvel at his untapped potential.

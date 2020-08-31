@@ -1,0 +1,94 @@
+---
+title: "WTA Set Analysis"
+author: "Peter Tea"
+date: "09/07/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data Source
+Data obtained via Jeff Sackmann's [tennis_wta](https://github.com/JeffSackmann/tennis_wta) repo.
+
+```{r collect_data, echo=FALSE, eval=FALSE}
+# WTA set analysis
+# How much does winning the 1st set matter in the WTA grand slams?
+library(ggplot2)
+library(dplyr)
+
+setwd("/Users/petertea/Documents/Github/match-analysis/")
+source("/Users/petertea/Documents/Github/match-analysis/src/wta_collect_set_data.R")
+
+# Get data
+wta_historic_set_data <- wta_collect_entire_set_data(1968:2019)
+
+# Add win given dropping first set indicator columm:
+wta_historic_set_data <- wta_historic_set_data %>%
+  mutate(drop_1st_set_and_still_won = ifelse(first_set_winner == 2, 1,0))
+
+# --> Save file..
+saveRDS(wta_historic_set_data, file = "wta_historic_set_data.rds")
+```
+
+
+
+## Any gaps in the data?
+
+Seems like before 1988, we have pretty small data samples.
+
+```{r data_quality, echo = FALSE, message = FALSE, warning=FALSE}
+library(ggplot2)
+library(dplyr)
+setwd("/Users/petertea/Documents/GitHub/match-analysis/wta_analysis")
+wta_historic_set_data <- readRDS('wta_historic_set_data.rds')
+
+# How many datapoints do we have each year?
+wta_historic_set_data %>%
+  group_by(year) %>%
+  summarise(observations = n()) %>%
+  ggplot(aes(x = year, y = observations)) +
+  geom_point()
+```
+
+
+## How likely are WTA players to win if they drop the opening set?
+
+Interesting increase from 2001 - 2007, but most players don't end up winning after dropping the opening set.
+
+High proportion in QF and up group could be due to relatively smaller sample sizes.
+
+```{r set_plot, echo = FALSE, message = FALSE, warning=FALSE}
+wta_data <- wta_historic_set_data %>%
+  filter(year >= 1988) %>%
+  #filter(grepl(round, pattern = 'F'))%>% 
+  group_by(year) %>%
+  summarise(prop = sum(drop_1st_set_and_still_won) / n()) 
+
+wta_data_F <- wta_historic_set_data %>%
+  filter(year >= 1988) %>%
+  filter(grepl(round, pattern = 'F'))%>% 
+  group_by(year) %>%
+  summarise(F_prop = sum(drop_1st_set_and_still_won) / n()) 
+
+wta_data_NF <- wta_historic_set_data %>%
+  filter(year >= 1988) %>%
+  filter(!grepl(round, pattern = 'F'))%>% 
+  group_by(year) %>%
+  summarise(NF_prop = sum(drop_1st_set_and_still_won) / n()) 
+
+wta_to_plot <- wta_data %>% left_join(wta_data_F, by = 'year') %>%
+  left_join(wta_data_NF, by = 'year')
+
+wta_to_plot <- reshape2::melt(wta_to_plot, id=c("year"))
+
+ggplot(data = wta_to_plot, aes(x = year, y = value, color = variable)) +
+  geom_point() + geom_line(linetype = 3) + geom_smooth(method='auto', alpha = 0.25) +
+  xlab("Year") +
+  theme_bw() + 
+  ylab("Win Proportion") + 
+  ggtitle('Does dropping the 1st Set matter in the WTA')+ 
+  scale_color_manual(values=c("blue", "forestgreen", "red"),
+                     labels = c('Entire Tournament','QF and up','Before QF'))
+```

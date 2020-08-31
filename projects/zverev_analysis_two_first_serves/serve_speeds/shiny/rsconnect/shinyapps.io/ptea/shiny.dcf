@@ -1,0 +1,10 @@
+name: shiny
+title:
+username:
+account: ptea
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2496162
+bundleId: 3309308
+url: https://ptea.shinyapps.io/shiny/
+when: 1592966628.05529
