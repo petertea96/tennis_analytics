@@ -1,22 +1,45 @@
 # -- Are players who fall 2 sets to love more likely to come all the way back now than they 
 # were in the past? 
 # -- Seems like no..
+
+# Which players have comeback down 2 sets to love the most?
+
 library(ggplot2)
 library(dplyr)
 
-setwd("/Users/petertea/Documents/Github/match-analysis/")
-source("/Users/petertea/Documents/Github/match-analysis/src/collect_set_data.R")
+setwd("/Users/petertea/tennis_analytics/prototypes/comeback_down_two_sets_to_love/")
+source("/Users/petertea/tennis_analytics/prototypes/comeback_down_two_sets_to_love/src/collect_set_data.R")
 
 # -- Collect all historic data
-historic_set_data <- collect_entire_set_data(1968:2019)
+atp_match_score_data_path <- "/Users/petertea/Documents/tennis_data/tennis_atp/"
+historic_set_data <- collect_entire_set_data(1968:2020, atp_match_score_data_path)
+
+# -- quality checks
+historic_set_data %>%
+  filter(five_set_complete_comeback == 1) %>%
+  filter(winner == 'Aaron Krickstein') %>%
+  View()
+
+
+# -- quality checks
+historic_set_data %>%
+  filter(five_set_complete_comeback == 1) %>%
+  filter(winner == 'Roger Federer') %>%
+  View()
+
+# Count how many times a player has completed a 'down-2-sets-to-love' comeback
+historic_set_data  %>%
+  filter(five_set_complete_comeback == 1) %>%
+  group_by(winner) %>%
+  summarise(n = n()) %>%
+  arrange(desc(n))
+
+
 
 # --> Save file..
 saveRDS(historic_set_data, file = "historic_set_data.rds")
 
-# Add indicator on whether a player faced 2 set to love deficit
-historic_set_data <- historic_set_data %>%
-  mutate(love_2 = ifelse(first_set_winner == second_set_winner,
-         1,0))
+
 
 
 # For each year, calculate total instances of interest
