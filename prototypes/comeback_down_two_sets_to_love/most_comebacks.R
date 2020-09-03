@@ -16,10 +16,21 @@ View(atp_set_data)
 complete_comeback_entries <- atp_set_data %>%
   filter(five_set_complete_comeback == 1) 
 
-atp_set_data %>%
-  filter(five_set_complete_comeback == 1) %>%
-  filter(winner == 'Roger Federer') %>%
-  View()
+# atp_set_data %>%
+#   filter(five_set_complete_comeback == 1) %>%
+#   filter(winner == 'Roger Federer') %>%
+#   View()
+# 
+# atp_set_data %>%
+#   filter(five_set_complete_comeback == 1) %>%
+#   filter(winner == 'Bjorn Borg') %>%
+#   View()
+
+# atp_set_data %>%
+#   #filter(five_set_complete_comeback == 1) %>%
+#   filter(year == 1980) %>%
+#   filter(winner == 'John McEnroe') %>%
+#   View()
 
 
 # Count how many times a player has completed a 'down-2-sets-to-love' comeback
@@ -29,7 +40,11 @@ player_comeback_counts <- complete_comeback_entries %>%
   arrange(desc(complete_comebacks ))
   
 # Count how many times a player has forced a 5th set from 'down-2-sets-to-love'
-player_incomplete_comeback_counts <- complete_comeback_entries %>%
+incomplete_comeback_entries <- atp_set_data %>%
+  filter(five_set_incomplete_comeback == 1) 
+
+
+player_incomplete_comeback_counts <- incomplete_comeback_entries %>%
   group_by(loser) %>%
   summarise(incomplete_comebacks = n()) %>%
   arrange(desc(incomplete_comebacks))
@@ -47,7 +62,7 @@ down_2_sets_to_love_data <- down_2_sets_to_love_data %>%
 
 # Add 1 to Andy Murray (US Open 2020, Sep 1st)
 down_2_sets_to_love_data[down_2_sets_to_love_data$winner == 'Andy Murray',2] <- 10
-down_2_sets_to_love_data[down_2_sets_to_love_data$winner == 'Andy Murray',4] <- 11
+down_2_sets_to_love_data[down_2_sets_to_love_data$winner == 'Andy Murray',4] <- 13
 
 
 data_to_plot <- down_2_sets_to_love_data %>%
@@ -102,6 +117,7 @@ geom_point(
                     c('Completed Comeback', 'Forced 5th Set'),
                     name = " ")+
   
+  xlim(0,15) +
   scale_x_continuous(name = '# of Matches',
                      seq(0,15,5)) +
   
