@@ -6,6 +6,7 @@ setwd("/Users/petertea/tennis_analytics/prototypes/player_height")
 # -- Load libraries
 library(dplyr)
 library(ggplot2)
+library(ggrepel)
 extrafont::loadfonts()
 
 source("/Users/petertea/tennis_analytics/prototypes/player_height/plot_theme.R")
@@ -20,16 +21,16 @@ source("/Users/petertea/tennis_analytics/prototypes/player_height/plot_theme.R")
 # -- Maybe plot all points from players who played 50 matches,
 #    but label only the "interesting" names?
 
-atp_ranking_filename <- "/Users/petertea/tennis_analytics/prototypes/player_height/data/processed_data/end_of_year_atp_rankings.csv"
-atp_rankings <- read.csv(atp_ranking_filename)
+# atp_ranking_filename <- "/Users/petertea/tennis_analytics/prototypes/player_height/data/processed_data/end_of_year_atp_rankings.csv"
+# atp_rankings <- read.csv(atp_ranking_filename)
 
 # -- Which player labels will we display on the graphic?
 # -- Players who held an end-of-year ranking of 20
-player_ids_to_keep <- atp_rankings %>%
-  filter((year >= 2010) & (year <= 2019)) %>%
-  filter(rank <= 20) %>%
-  select(player) %>%
-  .$player
+# player_ids_to_keep <- atp_rankings %>%
+#   filter((year >= 2010) & (year <= 2019)) %>%
+#   filter(rank <= 10) %>%
+#   select(player) %>%
+#   .$player
 
 
 # -- Load in processed aces data -----
@@ -38,94 +39,316 @@ atp_aces_20_19_df <- read.csv(aces_file_name, stringsAsFactors = FALSE)
 
 atp_aces_20_19_df[,c(4:9)] <- 100*atp_aces_20_19_df[,c(4:9)]
 
+write.csv(atp_aces_20_19_df,
+          'atp_aces_20_19_df.csv',
+          row.names = TRUE
+          )
 # . ' ' . || . ' ' . || . ' ' . || . ' ' . || . ' ' . || . ' ' . || #
 # . ' ' . || . ' ' . || . ' ' . || . ' ' . || . ' ' . || . ' ' . || #
 
 # Plot Aces Allowed vs. Aces Hit ------
-atp_aces_20_19_df <- atp_aces_20_19_df %>%
-  mutate(grouped_height_inches = ifelse(player_height_cm <=173,
-                                        "At or below 5'8\"",
-                                        ifelse(player_height_cm>=196, "At or above 6'5\"",
-                                               player_height_inches)))
+# ***** ... ***** ... ***** ... ***** ...  ***** ... ***** ... *****
+# -- If considering height in terms of Feet and Inches:
+# ***** ... ***** ... ***** ... ***** ...  ***** ... ***** ... *****
+# atp_aces_20_19_df <- atp_aces_20_19_df %>%
+#   mutate(grouped_height_inches = ifelse(player_height_cm <=173,
+#                                         "At or below 5'8\"",
+#                                         ifelse(player_height_cm>=196, "At or above 6'5\"",
+#                                                player_height_inches)))
+# 
+# height_level_vector <- c("At or below 5'8\"", "5'9\"", "5'10\"", "5'11\"", "6'0\"",
+#                          "6'1\"", "6'2\"", "6'3\"", "6'4\"", "At or above 6'5\"")
+# 
+# atp_aces_20_19_df$grouped_height_inches <- factor(atp_aces_20_19_df$grouped_height_inches,
+#                                                   levels = height_level_vector)
+# 
+# atp_aces_20_19_df$grouped_height_integer <- as.integer(atp_aces_20_19_df$grouped_height_inches)
 
-height_level_vector <- c("At or below 5'8\"", "5'9\"", "5'10\"", "5'11\"", "6'0\"",
-                         "6'1\"", "6'2\"", "6'3\"", "6'4\"", "At or above 6'5\"")
+# -- There are just too many names...
+# atp_aces_20_19_df %>%
+#   filter(player_id %in% player_ids_to_keep) %>%
+#   View()
+# 
+# atp_aces_20_19_df %>%
+#   arrange(avg_ace_rate) %>%
+#   View()
+# atp_aces_20_19_df %>%
+#   arrange(opp_avg_ace_rate) %>%
+#   View()
 
-atp_aces_20_19_df$grouped_height_inches <- factor(atp_aces_20_19_df$grouped_height_inches,
-                                                  levels = height_level_vector)
+atp_aces_20_19_df %>%
+  mutate(cumulative_skill_sum = abs(opp_ace_rate_above_expected) + abs(ace_rate_above_expected)) %>%
+  arrange(cumulative_skill_sum) %>%
+  View()
 
-atp_aces_20_19_df$grouped_height_integer <- as.integer(atp_aces_20_19_df$grouped_height_inches)
+# player_names <- c('Andy Roddick', 'Nick Kyrgios', 'Reilly Opelka','Ivo Karlovic', 'John Isner',
+#   'Gael Monfils', 'Benoit Paire', 'Milos Raonic', 'Jo-Wilfried Tsonga', 'Denis Shapovalov',
+#      
+#   'David Ferrer', 'Rafael Nadal', 'Novak Djokovic', 'Andy Murray','Roger Federer',
+#   'Daniil Medvedev', 'Alexander Zverev')
+
+player_names_quad_1 <- c('Andy Roddick', 'Nick Kyrgios', 'Reilly Opelka','John Isner')
+player_names_quad_2 <- c('Benoit Paire', 'Milos Raonic', 'Denis Shapovalov')
+player_names_quad_3 <- c('Fabio Fognini', 'David Ferrer', 'Diego Schwartzman')
+player_names_quad_4 <- c('Olivier Rochus', 'Yoshihito Nishioka')
+
+text_position_right_x <- 9
+text_position_up_y <- 8.5
+text_position_down_y <- -5
+text_position_left_x <- -15
 
 ggplot() +
   # -- Manually adding Upper Right Quadrant
   annotate(geom="text", #x=172.5, 
-           x= 15,
-           y=8,
+           x= text_position_right_x,
+           y=text_position_up_y,
            hjust = 0,
            size = 3.5,
            family = 'Tahoma',
            fontface = 'bold',
-           label="+ Server",
-           color="green") +
+           label="Above Average Server",
+           color="green3") +
   annotate(geom="text", #x=172.5, 
-           x= 15,
-           y=7.5,
+           x= text_position_right_x,
+           y=text_position_up_y - 0.5,
            hjust = 0,
            size = 3.5,
            family = 'Tahoma',
            fontface = 'bold',
-           label="- Returner",
+           label="Below Average Returner",
            color="red") +
-  annotate("rect", xmin = 14, xmax = Inf, 
-           ymin = 7, ymax = 8.5,
+  annotate("rect", xmin = text_position_right_x - 0.5, 
+           xmax = Inf, 
+           ymin = text_position_up_y - 1,
+           ymax = Inf,
            alpha = .1) + 
   
   # -- Manually adding Lower Right Quadrant
   annotate(geom="text", #x=172.5, 
-           x= 15,
-           y=-4.5,
+           x= text_position_right_x,
+           y=text_position_down_y,
            hjust = 0,
            size = 3.5,
            family = 'Tahoma',
            fontface = 'bold',
-           label="- Server",
+           label="Above Average Server",
+           color="green3") +
+  annotate(geom="text", #x=172.5, 
+           x= text_position_right_x,
+           y=text_position_down_y - 0.5,
+           hjust = 0,
+           size = 3.5,
+           family = 'Tahoma',
+           fontface = 'bold',
+           label="Above Average Returner",
+           color="green3") +
+  annotate("rect", xmin = text_position_right_x - 0.5, 
+           xmax = Inf, 
+           ymin = -Inf, ymax = text_position_down_y +0.5,
+           alpha = .1) + 
+  
+  # -- Manually adding Upper Left Quadrant
+  annotate(geom="text", #x=172.5, 
+           x= -Inf,
+           y=text_position_up_y,
+           hjust = -0.05,
+           size = 3.5,
+           family = 'Tahoma',
+           fontface = 'bold',
+           label="Below Average Server",
            color="red") +
   annotate(geom="text", #x=172.5, 
-           x= 15,
-           y=-5,
-           hjust = 0,
+           x= -Inf,
+           y=text_position_up_y - 0.5,
+           hjust = -0.05,
            size = 3.5,
            family = 'Tahoma',
            fontface = 'bold',
-           label="+ Returner",
-           color="green") +
+           label="Below Average Returner",
+           color="red") +
+  annotate("rect", xmin = -Inf, 
+           xmax = -15 + 10, 
+           ymin = text_position_up_y - 1,
+           ymax = Inf,
+           alpha = .1) + 
   
-  geom_vline(xintercept = 0, size = 1,linetype='dashed') +
-  geom_hline(yintercept = 0, size = 1, linetype='dashed') +
-  # geom_label_repel(data = atp_aces_top_y,
-  #                   aes(x = aa_aces, y = aa_opp_aces,label = name_tag, color = as.factor(grouped_height)),
-  #                   size = 2.8,show.legend = FALSE,
-  #                   label.padding = unit(0.15, "lines")
-  #                   ) +
+  # -- Manually adding Lower Left Quadrant
+  annotate(geom="text", #x=172.5, 
+           x= -Inf,
+           y=text_position_down_y,
+           hjust = -0.05,
+           size = 3.5,
+           family = 'Tahoma',
+           fontface = 'bold',
+           label="Below Average Server",
+           color="red") +
+  annotate(geom="text", #x=172.5, 
+           x= -Inf,
+           y=text_position_down_y - 0.5,
+           hjust = -0.05,
+           size = 3.5,
+           family = 'Tahoma',
+           fontface = 'bold',
+           label="Above Average Returner",
+           color="green3") +
+  annotate("rect", xmin = -Inf, 
+           xmax = -15 +10, 
+           ymin = -Inf, ymax = text_position_down_y +0.5,
+           alpha = .1) + 
+  
+  geom_vline(xintercept = 0, size = 0.75,linetype='dashed') +
+  geom_hline(yintercept = 0, size = 0.75, linetype='dashed') +
+  
+  # -- Upper Right Quadrant player names
+  geom_label_repel(data = atp_aces_20_19_df %>%
+                     filter(player %in% player_names_quad_1),
+                   aes(x = ace_rate_above_expected,
+                       y = opp_ace_rate_above_expected,
+                       label = player,
+                       fill = player_height_cm),
+                   nudge_y = 2.8,
+                   nudge_x = 0,
+                   fontface = 'bold',
+                   size = 2.8,
+                   show.legend = FALSE,
+                   arrow = arrow(ends ='last',
+                                 type = 'closed',
+                                 length = unit(0.015, "npc")),
+                   point.padding = unit(0.5, "lines"),
+                    label.padding = unit(0.25, "lines")
+   ) +
+  # -- Karlovic
+  geom_label_repel(data = atp_aces_20_19_df %>%
+                     filter(player == 'Ivo Karlovic'),
+                   aes(x = ace_rate_above_expected,
+                       y = opp_ace_rate_above_expected,
+                       label = player,
+                       fill = player_height_cm),
+                   nudge_y = 1,
+                   nudge_x = 3,
+                   fontface = 'bold',
+                   size = 2.8,
+                   show.legend = FALSE,
+                   arrow = arrow(ends ='last',
+                                 type = 'closed',
+                                 length = unit(0.015, "npc")),
+                   point.padding = unit(0.5, "lines"),
+                   label.padding = unit(0.25, "lines")
+  ) +
+  # -- Lower Right Quadrant player names
+  geom_label_repel(data = atp_aces_20_19_df %>%
+                     filter(player %in% player_names_quad_2),
+                   aes(x = ace_rate_above_expected,
+                       y = opp_ace_rate_above_expected,
+                       label = player,
+                       fill = player_height_cm),
+                   nudge_y = 0,
+                   nudge_x = 8,
+                   fontface = 'bold',
+                   size = 2.8,
+                   show.legend = FALSE,
+                   arrow = arrow(ends ='last',
+                                 type = 'closed',
+                                 length = unit(0.015, "npc")),
+                   point.padding = unit(0.5, "lines"),
+                   label.padding = unit(0.25, "lines")
+  ) +
+  # Gael Monfils
+  # -- Lower Right Quadrant player names
+  geom_label_repel(data = atp_aces_20_19_df %>%
+                     filter(player =='Gael Monfils'),
+                   aes(x = ace_rate_above_expected,
+                       y = opp_ace_rate_above_expected,
+                       label = player,
+                       fill = player_height_cm),
+                   nudge_y = -2,
+                   nudge_x = 3,
+                   fontface = 'bold',
+                   size = 2.8,
+                   show.legend = FALSE,
+                   arrow = arrow(ends ='last',
+                                 type = 'closed',
+                                 length = unit(0.015, "npc")),
+                   point.padding = unit(0.5, "lines"),
+                   label.padding = unit(0.25, "lines")
+  ) +
+  # Andy Murray
+  geom_label_repel(data = atp_aces_20_19_df %>%
+                     filter(player =='Andy Murray'),
+                   aes(x = ace_rate_above_expected,
+                       y = opp_ace_rate_above_expected,
+                       label = player,
+                       fill = player_height_cm),
+                   nudge_y = -4.25,
+                   nudge_x = -0.75,
+                   fontface = 'bold',
+                   size = 2.8,
+                   show.legend = FALSE,
+                   arrow = arrow(ends ='last',
+                                 type = 'closed',
+                                 length = unit(0.015, "npc")),
+                   point.padding = unit(0.5, "lines"),
+                   label.padding = unit(0.25, "lines")
+  ) +
+  
+  # -- Lower Left Quadrant player names
+  geom_label_repel(data = atp_aces_20_19_df %>%
+                     filter(player %in% player_names_quad_3),
+                   aes(x = ace_rate_above_expected,
+                       y = opp_ace_rate_above_expected,
+                       label = player,
+                       fill = player_height_cm),
+                   nudge_y = 0,
+                   nudge_x = -9,
+                   fontface = 'bold',
+                   size = 2.8,
+                   show.legend = FALSE,
+                   arrow = arrow(ends ='last',
+                                 type = 'closed',
+                                 length = unit(0.015, "npc")),
+                   point.padding = unit(0.5, "lines"),
+                   label.padding = unit(0.25, "lines")
+  ) +
+  # -- Upper Left Quadrant player names
+  geom_label_repel(data = atp_aces_20_19_df %>%
+                     filter(player %in% player_names_quad_4),
+                   aes(x = ace_rate_above_expected,
+                       y = opp_ace_rate_above_expected,
+                       label = player,
+                       fill = player_height_cm),
+                   nudge_y = 0,
+                   nudge_x = -7,
+                   fontface = 'bold',
+                   size = 2.8,
+                   show.legend = FALSE,
+                   arrow = arrow(ends ='last',
+                                 type = 'closed',
+                                 length = unit(0.015, "npc")),
+                   point.padding = unit(0.5, "lines"),
+                   label.padding = unit(0.25, "lines")
+  ) +
+  
   geom_point(data = atp_aces_20_19_df,
              aes(x = ace_rate_above_expected,
                  y = opp_ace_rate_above_expected, 
                  fill = player_height_cm),
-             alpha = 0.95,
+             alpha = 0.75,
              shape = 21,
              size = 2.5
   ) +
+  
   scale_fill_gradient2(midpoint = mean(atp_aces_20_19_df$player_height_cm),
                        low = "#83D0E9", mid = "white",
                        high = "indianred", space = "Lab" ) +
-  labs(title = 'A Decade Trading Aces',
+  labs(title = 'Trading Aces in the 2010s: Comparing Aces Hit\nto Aces Allowed',
        x='Aces Hit \n Above Average',
        y = 'Aces Allowed\n Above Average',
-       caption=" Stats On-The-T"
+       fill = "Player Height \n(cm)",
+       caption="Stats On-The-T\nData: Tennis Abstract &\natptour.com"
   ) + 
   
   scale_x_continuous(
-    limits = c(-10,19),
+    limits = c(-15,19),
     breaks = c(-10, -5, 0, 5, 10, 15),
     labels=c("-0.1" = "-10 %", '-0.05' ="-5 %", '0' = '0 %', "0.05" = "+5 %", "0.1" = "+10 %",
              "0.15" = "+15 %")
@@ -136,13 +359,26 @@ ggplot() +
     labels=c('-0.05' ="-5 %", "-0.025" = "-2.5 %","0" = "0 %", "0.025" = "+2.5 %",
              '0.05' ="+5 %", '0.075' ="+7.5 %")
   ) +
-  
-
-  plot_theme()
-
+  plot_theme() +
+  theme(legend.position = c(0.05, -0.15))
 
 
 
+ggsave('atp_trading_Aces.jpg',
+       width=7.25, height=5.5,
+       dpi = 450)
+
+ggsave('atp_trading_acess.jpg',
+       width=7.25, height=5.5,
+       dpi = 275)
+
+
+ggplot(data = atp_aces_20_19_df,
+       aes(x = ace_rate_above_expected,
+           y = opp_ace_rate_above_expected, 
+           fill = player_height_cm))+ 
+  geom_tile() +
+  scale_fill_distiller(palette = "RdPu") 
 
 
 # . ' ' . || . ' ' . || . ' ' . || . ' ' . || . ' ' . || . ' ' . || #

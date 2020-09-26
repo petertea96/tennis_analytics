@@ -8,7 +8,7 @@ plot_theme <- function(number_text_color = 'black',
     
     # -- Title
     plot.title = element_text(hjust = 0.5),
-    title = element_text(size = rel(1.1),
+    title = element_text(size = rel(1.01),
                          face = "bold",
                          family=family_font,
                          colour = 'black'),
@@ -39,9 +39,9 @@ plot_theme <- function(number_text_color = 'black',
     
     
     #grids
-    panel.grid.major.x = element_line(colour="#E5E4E2", size=0.5),
+    panel.grid.major.x = element_line(colour="#E5E4E2", size=0.25),
     panel.grid.minor.x = element_blank(),
-    panel.grid.major.y = element_line(colour="#E5E4E2", size=0.01),
+    panel.grid.major.y = element_line(colour="#E5E4E2", size=0.25),
     panel.grid.minor.y = element_blank(), 
     
     
@@ -63,8 +63,7 @@ plot_theme <- function(number_text_color = 'black',
                                size = 11,
                                color=text_colour),
     axis.text.y = element_text(color=text_colour, 
-                               size=11,
-                               face = 'bold'),
+                               size=11),
     
     axis.line = element_line(),
     axis.line.x = element_line(size = 0.75),
