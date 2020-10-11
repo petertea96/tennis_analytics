@@ -139,7 +139,106 @@ write.csv(x = atp_aces,
           file = '/Users/petertea/tennis_analytics/prototypes/player_height/data/processed_data/processed_atp_aces_data_10_19.csv')
 
 
+# ... # .. # . # .. # ... # ... # .. # . # .. # ... # ... # .. # . # .. #
+# ... # .. # . # .. # ... # ... # .. # . # .. # ... # ... # .. # . # .. #
+# Modify calculations to be: Total Aces Hit / Total Services
+# In previous code, we take the average ace rates across matches
+# ... # .. # . # .. # ... # ... # .. # . # .. # ... # ... # .. # . # .. #
+# ... # .. # . # .. # ... # ... # .. # . # .. # ... # ... # .. # . # .. #
 
+# -- Calculate averages over entire decade for each player
+atp_match_data_grouped_10_19_total <-atp_match_data_10_19 %>%
+  filter((s_svpt) > 0 & (s_2ndIn > 0) ) %>%
+  group_by(returner, returner_id) %>%
+  summarise(matches_played = n(),
+            total_opponent_df = sum(s_df),
+            total_opponent_ace = sum(s_ace),
+            total_opponent_serves = sum(s_svpt),
+            total_opponent_2nd_serves = sum(s_svpt) - sum(s_1stIn)) %>%
+  left_join(atp_match_data_10_19 %>% 
+              group_by(server, server_id) %>%
+              summarise(total_df = sum(s_df),
+                        total_ace = sum(s_ace),
+                        total_serves = sum(s_svpt),
+                        total_2nd_serves = sum(s_svpt) - sum(s_1stIn)),
+            by = c('returner' = 'server', 'returner_id' = 'server_id')
+  ) %>%
+  arrange(desc(matches_played)) %>%
+  rename(player = returner,
+         player_id = returner_id) %>%
+  mutate(ace_rate = total_ace / total_serves,
+         df_rate = total_df / total_2nd_serves,
+         opp_ace_rate = total_opponent_ace/ total_opponent_serves,
+         opp_df_rate = total_opponent_df/total_opponent_2nd_serves) 
+
+
+
+# -- Add columns in terms of above and below tour average
+atp_aces_total <- atp_match_data_grouped_10_19_total %>%
+  mutate(opp_ace_rate_above_expected = opp_ace_rate - mean(atp_match_data_grouped_10_19_total$opp_ace_rate),
+         ace_rate_above_expected = ace_rate -mean(atp_match_data_grouped_10_19_total$ace_rate) ) %>%
+  arrange(desc(ace_rate_above_expected))
+
+# -- Add player height data
+player_height_data <- read.csv('/Users/petertea/tennis_analytics/prototypes/player_height/data/processed_data/official_atp_height_2020.csv')
+
+
+atp_aces_total <- atp_aces_total %>%
+  left_join(player_height_data,
+            by = c('player' = 'player_name')) %>%
+  filter(matches_played > 50)
+
+
+write.csv(x = atp_aces_total,
+          row.names = FALSE,
+          file = '/Users/petertea/tennis_analytics/prototypes/player_height/data/processed_data/processed_atp_aces_data_10_19_TOTAL.csv')
+
+
+# ... # .. # . # .. # ... # ... # .. # . # .. # ... # ... # .. # . # .. #
+# ... # .. # . # .. # ... # ... # .. # . # .. # ... # ... # .. # . # .. #
+##### Make calculations across surface type -----
+# ... # .. # . # .. # ... # ... # .. # . # .. # ... # ... # .. # . # .. #
+# ... # .. # . # .. # ... # ... # .. # . # .. # ... # ... # .. # . # .. #
+
+# -- Calculate averages over entire decade for each player
+atp_match_data_grouped_10_19_and_by_surface <- atp_match_data_10_19_with_rates %>%
+  group_by(returner, returner_id, surface) %>%
+  summarise(matches_played = n(),
+            opp_avg_df_rate = mean(df_rate),
+            opp_avg_ace_rate = mean(ace_rate)) %>%
+  left_join(atp_match_data_10_19_with_rates %>% 
+              group_by(server, server_id) %>%
+              summarise(avg_df_rate = mean(df_rate),
+                        avg_ace_rate = mean(ace_rate)),
+            by = c('returner' = 'server', 'returner_id' = 'server_id')
+  ) %>%
+  arrange(desc(matches_played)) %>%
+  rename(player = returner,
+         player_id = returner_id)
+
+
+
+# Consider players who have completed 15 matches?
+atp_aces_by_surface <- atp_match_data_grouped_10_19_and_by_surface %>%
+  filter(matches_played >= 15)
+
+# -- Add player name tag
+atp_aces_by_surface$name_tag <- mapply(atp_aces_by_surface$player,
+                                       FUN = abbreviated_name)
+
+# -- Add player height data
+player_height_data <- read.csv('/Users/petertea/tennis_analytics/prototypes/player_height/data/processed_data/official_atp_height_2020.csv')
+
+
+atp_aces_by_surface<- atp_aces_by_surface %>%
+  left_join(player_height_data,
+            by = c('player' = 'player_name'))
+
+View(atp_aces_by_surface)
+
+write.csv(x = atp_aces_by_surface,
+          row.names = FALSE,
+          file = '/Users/petertea/tennis_analytics/prototypes/player_height/data/processed_data/processed_atp_aces_data_10_19_by_surface.csv')
 
 
 

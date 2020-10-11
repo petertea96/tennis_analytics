@@ -1,7 +1,7 @@
-### ReadMe
+# ReadMe
 
 ---
-How much is player height (and weight) han advantage while serving?
+How much is player height (and weight) an advantage while serving?
 
 This project aims to: 
 * Plot Ace Rates vs. Aces allowed, adding in height as a colour aesthetic
