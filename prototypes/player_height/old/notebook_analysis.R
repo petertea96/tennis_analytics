@@ -359,7 +359,7 @@ ggplot() +
     labels=c('-0.05' ="-5 %", "-0.025" = "-2.5 %","0" = "0 %", "0.025" = "+2.5 %",
              '0.05' ="+5 %", '0.075' ="+7.5 %")
   ) +
-  plot_theme() +
+  plot_theme(family_font = 'Tahoma') +
   theme(legend.position = c(0.05, -0.15))
 
 
@@ -379,6 +379,16 @@ ggplot(data = atp_aces_20_19_df,
            fill = player_height_cm))+ 
   geom_tile() +
   scale_fill_distiller(palette = "RdPu") 
+
+
+
+
+
+
+
+
+
+
 
 
 # . ' ' . || . ' ' . || . ' ' . || . ' ' . || . ' ' . || . ' ' . || #

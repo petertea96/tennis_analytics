@@ -1,3 +1,6 @@
+# -- Interactive version of plots
+# -- So far, ggplotly() is trash
+
 library(plotly)
 
 my_plot <- ggplot() +
@@ -5,7 +8,7 @@ my_plot <- ggplot() +
   geom_vline(xintercept = 0, size = 0.75,linetype='dashed') +
   geom_hline(yintercept = 0, size = 0.75, linetype='dashed') +
   
-  geom_point(data = atp_aces_20_19_df,
+  geom_point(data = atp_aces_10_19_df,
              aes(x = ace_rate_above_expected,
                  y = opp_ace_rate_above_expected, 
                  text = player,
@@ -15,7 +18,7 @@ my_plot <- ggplot() +
              size = 2.5
   ) +
 
-scale_fill_gradient2(midpoint = mean(atp_aces_20_19_df$player_height_cm),
+  scale_fill_gradient2(midpoint = mean(atp_aces_10_19_df$player_height_cm),
                      low = "#83D0E9", mid = "white",
                      high = "indianred", space = "Lab" ) +
   labs(title = 'Trading Aces: Comparing Aces Hit to Aces Prevented',
@@ -50,7 +53,7 @@ fig
 colorScale <- data.frame(z=c(0,0.5,1),col=c("blue","white","red"))
 colorScale$col <- as.character(colorScale$col)
 
-fig2 <- plot_ly(data = atp_aces_20_19_df,
+fig2 <- plot_ly(data = atp_aces_10_19_df,
                 x = ~ace_rate_above_expected, 
                 y = ~opp_ace_rate_above_expected,
                 text = ~player,
@@ -79,4 +82,5 @@ fig2 <- fig2 %>% layout(title = 'Trading Aces: Comparing Aces Hit to Aces Preven
                                    range = c(-10, 19)),
                       yaxis = list(title = 'Aces Allowed Above Average (%)',
                                    range = c(-5.5,8.5)))
+
 fig2
