@@ -299,7 +299,7 @@ ggplot() +
        x='Aces Hit \n Above Average',
        y = 'Aces Allowed\n Above Average',
        fill = "Player Height \n(cm)",
-       caption="Stats On-The-T\nData: Tennis Abstract &\natptour.com"
+       caption="On-The-T\nData: Tennis Abstract &\natptour.com"
   ) + 
   
   scale_x_continuous(
@@ -379,6 +379,10 @@ height_model <- lm(data = atp_aces_10_19_df,
 
 summary(height_model)
 
+predict(height_model, newdata = data.frame(player_height_cm = seq(190, 210,1)))
+
+
+
 # -- Fit Loess model
 height_model_loess <- loess(data = atp_aces_10_19_df,
                             formula = ace_rate ~ player_height_cm )
@@ -396,11 +400,11 @@ ggplot(data = atp_aces_10_19_df,
            #hjust = 0,
            family = 'Tahoma',
            fontface = 'bold',
-           label="Average Ace Rate (%)",
+           label="Ace Hit Rate (%)",
            color="black") +
   annotate("rect", #xmin = 167.5,
            xmin = -Inf, 
-           xmax = 184, 
+           xmax = 180, 
            ymin = 22.5, ymax = 24.5,
            alpha = .2) + 
   
@@ -428,10 +432,10 @@ ggplot(data = atp_aces_10_19_df,
              alpha = 0.25) +
   
   # -- Axis labels
-  labs(title = "The Height Advantage in Serving Aces (ATP)",
+  labs(title = "The Height Advantage in Serving Aces",
        y = '',
        x = '',
-       caption="Stats On-The-T\nData: Tennis Abstract & atptour.com") +
+       caption="On-The-T\nData: Tennis Abstract & atptour.com") +
   # method='loess'
   plot_theme(family_font = 'Tahoma',
              text_colour = 'black') 
@@ -443,7 +447,7 @@ ggsave('atp_height_univariate.jpg',
 
 # -- For which players does the cubic model not work well for?
 
-expected_ace_rate <- predict(object = height_model_loess,
+expected_ace_rate <- predict(object = height_model,
                              atp_aces_10_19_df)
 
 atp_aces_10_19_df$expected_ace_rate <- expected_ace_rate
@@ -514,7 +518,7 @@ ggplot(data = outliers_data_top_10,
                     ) +
   
   # -- Axis labels
-  labs(x = 'Ace Rate Above Expected (%)',
+  labs(x = 'Ace Hit Rate Above/Below Expected',
        y = '',
        title =  "Largest Residuals from\nHeight vs. Ace Rate Model",
        caption="On-The-T") +
@@ -559,7 +563,7 @@ ggpairs(data = atp_aces_10_19_df %>%
                           'Aces Allowed (%)' = 'opp_ace_rate',
                           'Weight (Kg)' = 'player_weight_kg',
                           'Height (cm)' = 'player_height_cm',
-                          'BMI' = 'player_bmi')), 
+                          'BMI (kg/m^2)' = 'player_bmi')), 
         lower= list(continuous = wrap(my_fn)),
         upper = list(continuous = wrap("cor", size = 5, digits = 2)),
         title="") +

@@ -84,3 +84,7 @@ fig2 <- fig2 %>% layout(title = 'Trading Aces: Comparing Aces Hit to Aces Preven
                                    range = c(-5.5,8.5)))
 
 fig2
+
+Sys.setenv("plotly_username"="petertea96")
+Sys.setenv("plotly_api_key"="nnbGNv4ddP2jP6sSfz5F")
+api_create(fig2, filename = "Trading_Aces")
