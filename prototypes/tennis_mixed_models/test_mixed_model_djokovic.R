@@ -32,7 +32,7 @@ rafa_nadal_2018_grand_slams %>%
 rafa_nadal_2018_grand_slams_mod_serve_location <- rafa_nadal_2018_grand_slams %>% 
   filter(!(is.null(ServeWidth)))%>%
   filter(!is.na(ServeWidth)) %>%
-  filter(nchar(ServeWidth) > 0) %>%
+  filter(nchar(as.character(ServeWidth)) > 0) %>%
   mutate(serve_location = ifelse( grepl(pattern = 'C', x = as.character(ServeWidth)), 'T',
                                   ifelse(grepl(pattern = 'W', x = as.character(ServeWidth)), 'W',
                                          ifelse('B' == as.character(ServeWidth),'B', 'NA'

@@ -1,0 +1,10 @@
+name: prototype_shiny
+title:
+username:
+account: ptea
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3158335
+bundleId: 3818463
+url: https://ptea.shinyapps.io/prototype_shiny/
+when: 1604473022.54354
