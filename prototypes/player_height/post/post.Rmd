@@ -1,0 +1,105 @@
+---
+title: "Revisiting the Height Advantage on Serve"
+author: "On-The-T"
+date: ""
+output:
+  html_document:
+  keep_md: yes
+---
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+The serve is the only shot in tennis where a player has full command of the ball, including its speed, placement, and spin. Some treat the serve as a mere prerequisite to a rally, often banking on subsequent rally shots to win points. For others, the serve is their bread-and-butter.  These players strike swiftly, often winning points without having to muster any further shots — what we call **aces**.
+
+What makes these players so dangerous on serve? Height is the likeliest culprit. Not only can [taller players serve at higher speeds](https://pubmed.ncbi.nlm.nih.gov/23724606/), but their higher vantage point also allows a larger margin for error to clear the net, and offers [wider angles](https://jfawcette.myportfolio.com/serve-impact-height) to target inside the service box. To recapitulate, taller players have the advantage in enhanced serve speed and accuracy — both of which helps precipitate an ace.
+
+Being tall may enhance a player's serve prowess, but it comes at the cost of diminished mobility that hurts their return game. Despite this limitation, height does grant longer arm reach that might assist in blocking or digging out shots, like serves fired against them, for example. This post will look at whether height provides a defensive advantage — in particular defense in limiting aces from the opposing serve.
+
+Weight is another measure possibly associated with hitting aces. A [2014 study](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4096092/) evaluating body kinematics among elite players from Hong Kong found a significant linear association between Body Mass Index (BMI) and serve speed. Although the study was limited to a sample size of 12, they argue that those with higher BMI can more easily generate *torque*, which in turn promotes higher speed. Since higher serve speeds typically produce more aces, is there an association between BMI and aces too? We’ll examine this question, and more.
+
+<br/>
+
+
+We considered matches in the 2010’s decade (i.e. 2010 - 2019). Ace data was obtained from [Tennis Abstract](https://github.com/JeffSackmann/tennis_atp), while player height and weight data were scraped from their official bios on [atptour.com](atptour.com). Only male players who completed at least 50 matches in this decade were included in our study — which was 221 players.
+
+The two ace metrics we studied were `Ace Hit Rate` and `Ace Allowed Rate`, which hopefully summarizes a player’s ability to attack with their serve, and defend against their opponent’s serve, respectively.  
+
+We calculated Ace Hit Rate as :
+
+$$ \textrm{Ace Hit Rate} = \frac{\textrm{Total # Aces Hit}}{\textrm{Total # Serve Points}} \cdot 100 \%  $$
+
+Similarly, we calculated Ace Allowed Rate as:
+
+$$ \textrm{Ace Allowed Rate} = \frac{\textrm{Opponents’ Total # Aces Hit}}{\textrm{Opponents’ Total # Serve Points}} \cdot 100 \%  $$
+
+
+Ace Allowed rate is an unorthodox measure. While Return Points Won (RPW) is the de facto measure of a player’s return ability, aces allowed isolates a player’s performance to a served shot away from all other shots encompassing an entire rally. To prevent aces, a player must have overt reactionary quickness and anticipation. While RPW also requires these traits, the performance may be confounded by fatigue and other rally-based skills and decisions made. In a sense, we are trying to isolate raw serve defense ability from a player’s overall rallying ability. 
+
+Below are scatterplots of aces hit and aces allowed rates against player height, weight and BMI, respectively. 
+
+<br/>
+
+<img src="plots/scatterplot.jpg" alt="best_aces_by_year" />
+
+*Lower diagonal boxes display the raw scatter points with a linear fit, while the upper diagonal boxes display the Pearson correlations with significance threshold values.*
+
+<br/>
+
+The strongest linear relationships between our anthropometric features and our two ace rates are between Height and Aces Hit, as well as Weight and Aces Hit. Contrary to the purported association between BMI and serve speed, our scatterplot between BMI and Ace Hit rates does not suggest a strong linear association. While we did find a statistically significant correlation value, this significance is likely driven by our large sample size.
+
+Interestingly, the rate of aces allowed did not correlate strongly with any of our anthropometric features. The diminished mobility may have offset the reach advantage for tall players, especially when chasing down opposition serves. 
+
+<br/>
+
+Zooming in closer on the Ace Hit Rate vs. Player Height scatter plot, we noticed that this relationship might not be entirely linear. That is, Ace Hit rates may not be increasing at the *same* constant rate across varying player heights. To account for a potential non-linear relationship, we fit a cubic regression curve outlined as follows: 
+
+$$E[\text{Ace Hit Rate}] =  B_0 + B_1*Height + B_2*Height^2 + B_3*Height^3$$
+Other methods like LOESS and optimal smoothing splines were also considered, but did not offer significant improvement. While not an entirely perfect fit, our cubic regression model still accounted for over 50% of the variance in Ace Hit Rates. There are unaccounted factors outside of height that influence ace rates, which may be related to serve technique and strategy. For example, players who can generate more torque or who deliberately serve flat rather than with extra spin (i.e. “kick” serves) are far more likely to hit aces. 
+
+<br/>
+
+<img src="plots/atp_height_univariate.jpg" alt="height_cubic" />
+
+<br/>
+
+Setting these thoughts of unaccounted factors aside, we used our naïve univariate model to identify players hitting aces at rates further from what we’d expect, given their height. Below are the top 10 players with the largest residuals in absolute value, all of which deviated at least 5 percentage points from their expected Ace Hit rates.
+
+Players in blue served aces at a rate higher than expected, while players in red served aces at a rate much lower than expected. The two hard-hitting Aussies in blue, Groth and Kyrgios, have certainly dominated the ace category this past decade. But what may be more impressive is their ability to churn out aces given their listed height at 193 cm (6’4”). In fact, they both served aces at a rate expected by someone about 206 cm tall.
+
+<br/>
+
+<img src="plots/atp_height_residuals.jpg" alt="residuals" />
+
+<br/>
+
+Meanwhile, the players in red provide examples of those who may have underutilized their height advantage on serve.  Especially during the 2010s decade, these four achieved only modest ace rates.
+
+<br/>
+
+Finally, you may have wondered how well players ranked in hitting aces, relative to the volume of aces conceded to their opponents. Comparing players on these 2 ace metrics can provide further insight on player attributes. A player who limits aces from their opponent may typify one with elite serve-return anticipation, while a player who consistently smashes aces exemplifies a serving paragon.
+
+Below, we plotted player Ace Hit Rates against Ace Allowed Rates. We adjusted our axes to represent  *aces hit above the average ATP player* and *aces allowed above the average ATP player* scales, by subtracting from each point the average corresponding ace rate, respectively. Essentially, all points represent how much better or worse a player was at hitting and preventing aces compared to the average player.
+
+Points falling further right on this plot are those who fired aces at an above average rate. As expected, the tallest players — indicated with dark red points — frequent the right side. In fact, the average height among players with an above average ace rate is 189 cm (over 6'2"). Meanwhile, players falling further downwards allowed fewer aces to their opponents. Visually, we see an equal distribution of player heights above and below the average ace allowed rate. This reinforces our previous notion of height not being a major requirement for defense against the serve.
+
+<br/>
+
+<img src="plots/atp_trading_aces_total.jpg" alt="ace_allowed" />
+
+*It is difficult to display all player names neatly on a static plot. [An interactive plot exists here](https://chart-studio.plotly.com/~petertea96/56).*
+
+<br/>
+
+
+We split our plot into 4 quadrants, each representing areas of joint above/below average performance. The upper right quadrant includes players involved in many low rally count matches, often trading aces back and forth with their opponents. Behind former US Open champion Andy Roddick — who at this point was declining in reactionary quickness and would eventually play just two more years — we again see the polarizing `Nick Kyrgios`. For those wanting to spectate an ace showdown, we'd certainly recommend a match involving Kyrgios. As someone who is prone to lapses in concentration on court, Kyrgios' [infuriatingly inconsistent effort](theguardian.com/sport/2016/oct/12/nick-kyrgios-row-serving-without-effort-not-returning-shanghai-masters) this past decade is certainly accentuated with his exorbitant Ace Allowed rate.
+ 
+The bottom left quadrant is filled with crafty players like Schwartzman, Fognini and Ferrer — players with a knack of digging out shots, but without much strength on their own serve.
+
+And lastly, the lower right quadrant contains players with a mix of decent serve attack and defense. Paire and Monfils are 2 prime examples of players who not only leverage their height to snipe aces, but who can also utilize their long reach to fend off opposing aces too. Canadian phenom Shapovalov also has the numbers to back up his strength in chasing down serves. Curiously, this hasn’t yet translated into many RPW for Shapo, as he has only produced [unremarkable RPW numbers](https://twitter.com/tennisabstract/status/1317170283099422724) so far in his young career. 
+
+Aces allowed are interesting to consider, but they should not be taken as the best measure of a player’s return capabilities — which is RPW. While guys like Djokovic, Schwartzman and Nadal are among the [ATP leaders in RPW](http://www.tennisabstract.com/cgi-bin/leaders.cgi?f=s31w1), they actually don’t rank as strongly on our Aces Allowed metric. The serve — an integral part of tennis — is still just a component of the game. Surviving the rallies that come after the serve is just as important to win return points.
