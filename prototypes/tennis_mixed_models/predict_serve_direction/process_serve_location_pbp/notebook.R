@@ -3,7 +3,7 @@ library(ggplot2)
 library(mgcv)
 library(lme4)
 
-filename <- "/Users/petertea/tennis_analytics/prototypes/process_serve_location_pbp/processed_slam_pointbypoint.rds"
+filename <- "/Users/petertea/tennis_analytics/prototypes/tennis_mixed_models/predict_serve_direction/process_serve_location_pbp/processed_modified_body_serve_slam_pointbypoint.rds"
 slam_data <- readRDS(filename)
 
 
@@ -44,7 +44,7 @@ bar_chart_data %>%
   arrange(desc(freq)) %>% View()
 
 # Who had highest proportion to serves Wide:
-# Ans: Raonic, Medvedev, Gasquet, Paire
+# Ans: Raonic, Roger, Medvedev, Gasquet, Paire
 bar_chart_data %>%
   filter(serve_location == 'W') %>%
   arrange(desc(freq)) %>% View()
@@ -57,9 +57,10 @@ bar_chart_data %>%
 
 
 ### Makes sense to look at proportions against the same player?
-server_names <- c('Rafael Nadal', 'Novak Djokovic', 'Milos Raonic', 'Kevin Anderson')
+server_names <- c('Rafael Nadal', 'Novak Djokovic', 'Kevin Anderson')
 
-# Data of 4 servers against Federer
+
+# Data of 3 servers against Federer
 four_servers_data <- training_data %>%
   filter(server_name %in% server_names) %>%
   filter(returner_name == 'Roger Federer') %>%

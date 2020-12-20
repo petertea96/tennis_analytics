@@ -1,0 +1,55 @@
+---
+title: "STAT 852 Final Report"
+author: "Peter Tea"
+date: "07/12/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Review from STAT852
+
+
+Before diving into the mixed model framework, we first present a review of linear models, generalized linear models (GLM), and generalized additive models (GAM) from the STAT852 lecture notes.
+
+From Lecture 1, we have a classic linear model defined as:
+
+$$
+
+\begin{array}{c}\mathbf{y}=\mathbf{X} \boldsymbol{\beta}+\boldsymbol{\epsilon}, \quad \boldsymbol{\epsilon} \sim N\left(\mathbf{0}, \mathbf{I} \sigma^{2}\right) \\
+
+\mathbf{y}=\mathbf{X} \boldsymbol{\beta}+\mathbf{Z} \mathbf{b}+\boldsymbol{\epsilon}, \mathbf{b} \sim N\left(\mathbf{0}, \boldsymbol{\psi}_{\theta}\right), \boldsymbol{\epsilon} \sim N\left(\mathbf{0}, \boldsymbol{\Lambda}_{\theta}\right)\end{array} \\
+
+\mathbf{y} \sim N\left(\mathbf{X} \boldsymbol{\beta}, \mathbf{Z} \boldsymbol{\psi}_{\theta} \mathbf{Z}^{\top}+\mathbf{\Lambda}_{\theta}\right) \\
+
+\left[\begin{array}{cc}\sigma_{i n t}^{2} & \sigma_{i n t, s l o p e}^{2} \\ \sigma_{i n t, s l o p e}^{2} & \sigma_{s l o p e}^{2}\end{array}\right] \\
+
+f(y | \beta), f(y, b | \beta) \\
+
+
+f(y, b | \beta) = f(y | b, \beta) \cdot f(b) \\
+
+f(\mathbf{y} \mid \boldsymbol{\beta})=\int f(\mathbf{y}, \mathbf{b} \mid \boldsymbol{\beta}) d \mathbf{b} \\
+
+\mathbf{b} \mid \mathbf{y}, \hat{\boldsymbol{\beta}} \sim N\left(\hat{\mathbf{b}},\left(\mathbf{Z}^{\top} \mathbf{\Lambda}_{\theta}^{-1} \mathbf{Z}+\boldsymbol{\psi}_{\theta}^{-1}\right)^{-1}\right) \\
+
+\hat{\mathbf{b}}=\left(\mathbf{Z}^{\top} \mathbf{\Lambda}_{\theta}^{-1} \mathbf{Z}+\boldsymbol{\psi}_{\theta}^{-1}\right)^{-1} \mathbf{Z}^{\top} \boldsymbol{\Lambda}_{\theta}^{-1} \tilde{\mathbf{y}}\\
+
+\tilde{\mathbf{y}} = y - X \hat{\beta} \\
+
+g(\mu(X))=\alpha+\beta_{1} X_{1}+\ldots+\beta_{p} X_{p}\\
+
+\mu(X) = E(Y | X) \\
+
+
+g\left(\mu_{i}\right)=\mathbf{X}_{i} \boldsymbol{\beta}+\mathbf{Z}_{i} \mathbf{b}, \quad \mathbf{b} \sim N\left(\mathbf{0}, \boldsymbol{\psi}_{\theta}\right) \\
+
+g(\mu(X))=\alpha+f_{1}\left(X_{1}\right)+f_{2}\left(X_{2}\right)+\ldots+f_{p}\left(X_{p}\right)\\
+
+R S S(f, \lambda)=\sum_{i=1}^{n}\left(y_{i}-f\left(x_{i}\right)\right)^{2}+\lambda \int_{X_{\min }}^{X_{\max }}\left[f^{\prime \prime}(t)\right]^{2} d t
+
+
+$$

@@ -1,9 +1,9 @@
 # -- Theme
 
 plot_theme <- function(number_text_color = 'black',
-                        family_font = 'mono',
-                        bg_colour = '#FEF5E7',
-                        text_colour = "#414141",
+                       family_font = 'mono',
+                       bg_colour = '#FEF5E7',
+                       text_colour = "#414141",
                        axis_text_size = 11){
   theme(
     
@@ -32,11 +32,11 @@ plot_theme <- function(number_text_color = 'black',
     plot.caption=element_text(hjust=1, 
                               vjust = -0.1,
                               size=8.5,
-                              #margin=margin(t=-10),
+                              margin=margin(t=-10),
                               family=family_font, 
                               face='italic'),
     
-   # plot.margin = margin(10, 10, 10, 10),
+    plot.margin = margin(10, 10, 10, 10),
     
     
     #grids
@@ -76,11 +76,9 @@ plot_theme <- function(number_text_color = 'black',
     panel.background = element_rect(fill = bg_colour), #inside plot background
     panel.border = element_rect(colour = "black", fill=NA, size=1),
     
-
+    
   )
   
   
   
 }
-
-

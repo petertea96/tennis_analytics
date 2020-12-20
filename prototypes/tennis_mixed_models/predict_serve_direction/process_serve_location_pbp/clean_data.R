@@ -1,9 +1,9 @@
 #################################
 library(dplyr)
 
-source("/Users/petertea/tennis_analytics/prototypes/process_serve_location_pbp/ad_or_deuce.R")
-source("/Users/petertea/tennis_analytics/prototypes/process_serve_location_pbp/categorise_score.R")
-source("/Users/petertea/tennis_analytics/prototypes/process_serve_location_pbp/categorise_serve_location.R")
+source("/Users/petertea/tennis_analytics/prototypes/tennis_mixed_models/predict_serve_direction/process_serve_location_pbp/src/ad_or_deuce.R")
+source("/Users/petertea/tennis_analytics/prototypes/tennis_mixed_models/predict_serve_direction/process_serve_location_pbp/src/categorise_score.R")
+source("/Users/petertea/tennis_analytics/prototypes/tennis_mixed_models/predict_serve_direction/process_serve_location_pbp/src/categorise_serve_location.R")
 
 
 # server_match_id = "2019-wimbledon-1102"
@@ -145,6 +145,29 @@ process_match_stats <- function(server_match_id, year,
            player_last_serve2_loc = c(player1_last2_serve, player2_last2_serve)
            )
   
+  # Binary Serve Direction
+  # -- Add player height data
+  player_height_data <- read.csv('/Users/petertea/tennis_analytics/prototypes/player_height/data/processed_data/official_atp_height_2020.csv')
+  
+  player_points_data <- player_points_data %>%
+    left_join(player_height_data %>% dplyr::select(player_name, player_handedness),
+              by = c('returner_name' = 'player_name'))
+  
+  player_points_data$serve_loc_hand <- mapply(FUN = serve_loc_hand, player_points_data $player_handedness,
+                                              player_points_data $serve_location,
+                                              player_points_data $court_side)
+  
+
+  player1_last_serve <- c(NA, player_points_data[1:player1_last_serve_index, 'serve_loc_hand'][-player1_last_serve_index])
+  player1_last2_serve <- c(NA, NA, player_points_data[1:player1_last_serve_index, 'serve_loc_hand'][-c(player1_last_serve_index, player1_last_serve_index-1)])
+  
+  player2_last_serve <- c(NA, player_points_data[(player1_last_serve_index+1):nrow(player_points_data), 'serve_loc_hand'][-player2_last_serve_index])
+  player2_last2_serve <- c(NA, NA, player_points_data[(player1_last_serve_index+1):nrow(player_points_data), 'serve_loc_hand'][-c(player2_last_serve_index, player2_last_serve_index-1)])
+  
+  player_points_data <- player_points_data %>%
+    mutate(player_last_serve_binary_loc = c(player1_last_serve,player2_last_serve),
+           player_last_serve2_binary_loc = c(player1_last2_serve, player2_last2_serve)
+    )
 
   return(player_points_data)
   
@@ -275,9 +298,11 @@ recent_slam_data <- collect_all_grand_slam_data(possible_years = c(2016:2019),
 
 getwd()
 saveRDS(recent_slam_data, 
-        file = "/Users/petertea/tennis_analytics/prototypes/process_serve_location_pbp/processed_slam_pointbypoint.rds")
+        file = "/Users/petertea/tennis_analytics/prototypes/tennis_mixed_models/predict_serve_direction/process_serve_location_pbp/processed_modified_body_serve_slam_pointbypoint.rds")
 
 
+
+### Binary Response Variable #####
 # -- See if we have everyone's height/handedness
 
 player_names <- recent_slam_data %>%
@@ -303,10 +328,7 @@ player_height_data <- read.csv('/Users/petertea/tennis_analytics/prototypes/play
 # Nicolas Kicker --> (added manually)
 # Marcus Willis--> (added manually)
 
-
-test <- player_names  %>%
-  left_join(player_height_data %>% dplyr::select(player_name, player_handedness, player_height_cm),
-            by = c('server_name' = 'player_name'))
-
+saveRDS(recent_slam_data, 
+        file = "/Users/petertea/tennis_analytics/prototypes/tennis_mixed_models/predict_serve_direction/process_serve_location_pbp/processed_binary_serve_slam_pointbypoint.rds")
 
 
