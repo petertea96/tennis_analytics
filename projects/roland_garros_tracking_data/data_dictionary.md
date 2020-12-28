@@ -1,15 +1,24 @@
 # Court Vision Data Dictionary
 
-### Data Keys
+## Data Keys
 
 These are the keys in a JSON file:
 
-`pointsData`: For each point ID, some relevant play-by-play infor
-`eventType`: Ex: Mens/Womens singles or doubles
+
+### Match Information
+
+`eventType`: Ex: Mens/Womens singles
 `matchStatus`: Complete status flag
 `playersData`: Info on opposing players (name, id, seed, country)
 `pointId`: ???
 `isMatchComplete`: Another complete status flag
+`courtName`: Name of court. Ex: Philippe Chatrier
+`courtId` : Id of playing court
+`setsCompleted`: Number of completed sets in match
+
+
+### Play-by - play information 
+`pointsData`: For each point ID, some relevant play-by-play info.
 `statsData`: Provides labels for which points are:
 
 * pointsWon
@@ -25,16 +34,14 @@ These are the keys in a JSON file:
 * firstServeIn
 * unforcedError
 
-`courtName`: Name of court. Ex: Philippe Chatrier
-`courtId` : Id of playing court
-`setsCompleted`: Number of completed sets in match
+
 
 
 ### To do
 
 * Sort the keys (10 counts as 1 when in character format...)
 
-### Play - by - play
+### Play - by - play info in `pointsData`
 
 * Score features
 
