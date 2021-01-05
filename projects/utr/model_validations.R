@@ -12,27 +12,22 @@ num_splits <- 2
 V <- 5
 
 ##########################################################################
-# Methods: Default elo, tuned k, tuned double k, mov_joint_additive, mov_multiplicative,
-# mov_logistic
+# Methods: Default elo, tuned elo (single k), tuned elo (double k), mov_joint_additive, 
+#mov_multiplicative, mov_logistic
 
-# MSPE_data_matrix = matrix(NA, nrow=10, ncol=num_methods)
-# sMSE_data_matrix = matrix(NA, nrow=10, ncol=num_methods)
-# 
-# train_brier_matrix <- matrix(NA, nrow=10, ncol=num_methods) 
-# test_brier_matrix <- matrix(NA, nrow=10, ncol=num_methods)
-# 
-# method_names <- c('default_elo', 'tuned_k')
-# 
-# colnames(MSPE_data_matrix) <- method_names
-# colnames(sMSE_data_matrix) <- method_names
-# colnames(train_brier_matrix) <- method_names
-# colnames(test_brier_matrix) <- method_names
+MSPE_data_matrix = matrix(NA, nrow=10, ncol=num_methods)
+sMSE_data_matrix = matrix(NA, nrow=10, ncol=num_methods)
 
-# Read in previously saved results data
-sMSE_data_matrix <- read.csv('./model_performance/sMSE_data_matrix.csv')
-MSPE_data_matrix <- read.csv('./model_performance/MSPE_data_matrix.csv')
-train_brier_matrix <- read.csv('./model_performance/train_brier_matrix.csv')
-test_brier_matrix <- read.csv('./model_performance/test_brier_matrix.csv')
+train_brier_matrix <- matrix(NA, nrow=10, ncol=num_methods)
+test_brier_matrix <- matrix(NA, nrow=10, ncol=num_methods)
+
+
+
+# -- Read in previously saved results data 
+# sMSE_data_matrix <- read.csv('./model_performance/sMSE_data_matrix.csv')
+# MSPE_data_matrix <- read.csv('./model_performance/MSPE_data_matrix.csv')
+# train_brier_matrix <- read.csv('./model_performance/train_brier_matrix.csv')
+# test_brier_matrix <- read.csv('./model_performance/test_brier_matrix.csv')
 
 set.seed(23)
 for (random_split in 1:num_splits){ 
@@ -231,7 +226,7 @@ for (random_split in 1:num_splits){
     # # -- Time to run: ~ 2 minutes
     choose_double_k_values <- optimizek(choose_double_k ,
                                         krange = mykranges,
-                                        resolution = 5)
+                                        resolution = 5                          )
     #
     myk <- list(no = choose_double_k_values$best$no,
                 yes =choose_double_k_values$best$yes)
@@ -268,7 +263,7 @@ for (random_split in 1:num_splits){
                                 #message("Here's the original error message:")
                                 #message(cond)
                                 # Choose a return value in case of error
-                                return(1000)
+                                return(start_value)
                               }),
 
              l_elo =tryCatch(extract_elo(tuned_double_k,
@@ -278,7 +273,7 @@ for (random_split in 1:num_splits){
                                #message("Here's the original error message:")
                                #message(cond)
                                # Choose a return value in case of error
-                               return(1000)
+                               return(start_value)
                              })
 
       )

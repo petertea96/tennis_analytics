@@ -120,7 +120,7 @@ write.csv(assignment_to_submit, 'PeterTea.csv', row.names = FALSE)
 
 
 
-### TEst
+### ASIDE
 train_data_ordered$games_diff <- train_data_ordered$winner_games_won - train_data_ordered$loser_games_won
 
 
