@@ -89,6 +89,20 @@ def get_point_level_info(one_point_sequence):
         is_track_avail = False
     
     
+    z_net_serve = None
+    if is_track_avail :
+        
+        try:
+            served_ball_loc_net = one_point_sequence['trajectoryData'][2]
+            
+            if served_ball_loc_net['position'] == 'net':
+                z_net_serve = served_ball_loc_net['z']
+                
+        except IndexError:
+            print('Index Error...')
+        
+    
+    
     # Identify whether serve bounce is Body, Wide, or Down the T
     serveBounceCordinate_y = one_point_sequence['serveBounceCordinate']['y']
     
@@ -148,6 +162,7 @@ def get_point_level_info(one_point_sequence):
         serveBounceCordinate_y = one_point_sequence['serveBounceCordinate']['y'],
         serveBounceCordinate_z = one_point_sequence['serveBounceCordinate']['z'],
         serve_dir = serve_dir,
+        z_net_serve = z_net_serve,
         
         # (initial) Ball coordinate on last shot 
         ballHitCordinate_x = one_point_sequence['ballHitCordinate']['x'],

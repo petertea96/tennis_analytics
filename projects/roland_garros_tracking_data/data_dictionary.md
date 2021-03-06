@@ -196,3 +196,8 @@ Data dictionary using my own nomenclature
 * `spin_rpm`: Ball spin on last rally shot
 * `cruciality`: 
 * `returnPlacement`: 
+
+
+
+-----
+
