@@ -27,11 +27,16 @@ def categorise_serve_direction(serveBounceCordinate_y):
     
     
     Assumes Serve bounce coordinate is given in metres
+    Note: (0,0,0) are the coordinates at the middle of the net.
+    Dimension of court: 23.77 m in length (y), and 8.23 m wide (x) -- for single's court
+    
+    Classifies ball bounce coordinate as: Wide, Body, or T
     '''
     
     if serveBounceCordinate_y == None:
         return None
     
+    # Court is 8.23 m wide
     one_third_length = 4.115/3
 
     # Tenuous at the moment
@@ -53,7 +58,6 @@ def categorise_serve_direction(serveBounceCordinate_y):
 ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### 
 ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### 
 ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### 
-
 def get_point_level_info(one_point_sequence):
     '''
     Args:
@@ -70,27 +74,29 @@ def get_point_level_info(one_point_sequence):
     
     Notes:
     ------
-    Don't convert them to integers...yet
+    For a point sequence in a match, tidy information on relevant stats like serve speed
+    or ball coordinates.
     '''
     
+    # -- Get Serve Speed
     serve_speed_kph = one_point_sequence['ballSpeedFrench']
     if ( (serve_speed_kph == '0') | ( serve_speed_kph == 'NA' ) ):
         serve_speed_kph = one_point_sequence['returnSpeedFrench']
         
-    serve_speed_v2 = one_point_sequence['ballSpeed']
+    serve_speed_kph_v2 = one_point_sequence['ballSpeed']
     
-    if ( (serve_speed_v2 == '0') | ( serve_speed_v2 == 'NA' ) ):
-        serve_speed_v2 = one_point_sequence['returnSpeed']
-        
-    # Flag for whether we have tracking data on this point sequence
+    if ( (serve_speed_kph_v2 == '0') | ( serve_speed_kph_v2 == 'NA' ) ):
+        serve_speed_kph_v2 = one_point_sequence['returnSpeed']
+       
     
+    # -- Flag for whether we have tracking data on this point sequence
     is_track_avail = True
     if len(one_point_sequence['trajectoryData']) == 0 :
         is_track_avail = False
     
-    
+    # -- Serve Net Clearance
     z_net_serve = None
-    if is_track_avail :
+    if is_track_avail:
         
         try:
             served_ball_loc_net = one_point_sequence['trajectoryData'][2]
@@ -100,10 +106,48 @@ def get_point_level_info(one_point_sequence):
                 
         except IndexError:
             print('Index Error...')
-        
+            
+    ##########################################################################        
+    # -- Add ball location at contact of serve
+    x_ball_at_serve = None
+    y_ball_at_serve = None
+    z_ball_at_serve = None
     
     
-    # Identify whether serve bounce is Body, Wide, or Down the T
+    # -- Add max (peak) ball height location of serve
+    z_peak_serve = None
+    
+    if is_track_avail :
+        try:
+            ball_loc_at_serve = one_point_sequence['trajectoryData'][0]
+            
+            if ball_loc_at_serve['position'] == 'hit':
+                x_ball_at_serve = ball_loc_at_serve['x']
+                y_ball_at_serve = ball_loc_at_serve['y']
+                z_ball_at_serve = ball_loc_at_serve['z']
+                
+        except IndexError:
+            print('Index Error...')
+            
+            
+    #if is_track_avail :
+        try:
+            serve_peak = one_point_sequence['trajectoryData'][1]
+            
+            if serve_peak['position'] == 'peak':
+                z_peak_serve = serve_peak['z']
+                
+        except IndexError:
+            print('Index Error...')
+            
+    ########################################################################## 
+            
+
+
+    
+    
+    
+    # -- Identify whether serve bounce is Body, Wide, or Down the T
     serveBounceCordinate_y = one_point_sequence['serveBounceCordinate']['y']
     
     serve_dir = categorise_serve_direction(serveBounceCordinate_y)
@@ -128,12 +172,14 @@ def get_point_level_info(one_point_sequence):
         
         # Serve Stats
         serve_speed_kph = serve_speed_kph,
-        serve_speed_v2 = serve_speed_v2,
+        serve_speed_kph_v2 = serve_speed_kph_v2,
         serve_type = one_point_sequence['serveType'],
         fault_distance_missed_ft = one_point_sequence['distanceOutsideCourt'],
         fault_distance_missed_m = one_point_sequence['distanceOutsideCourtFrench'],
         #return_placement = one_point_sequence['returnPlacement'],
-        
+        x_ball_at_serve = x_ball_at_serve,
+        y_ball_at_serve = y_ball_at_serve,
+        z_ball_at_serve = z_ball_at_serve,
         
         # How point ended
         rally_length = one_point_sequence['rallyLength'],
@@ -163,6 +209,7 @@ def get_point_level_info(one_point_sequence):
         serveBounceCordinate_z = one_point_sequence['serveBounceCordinate']['z'],
         serve_dir = serve_dir,
         z_net_serve = z_net_serve,
+        z_peak_serve = z_peak_serve,
         
         # (initial) Ball coordinate on last shot 
         ballHitCordinate_x = one_point_sequence['ballHitCordinate']['x'],
@@ -192,7 +239,6 @@ def get_point_level_info(one_point_sequence):
 
 
 
-
 ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### 
 ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### 
 ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### 
@@ -211,6 +257,7 @@ def get_match_point_level_info(raw_json_file):
     ******************************************
     Iterate over all rally points in a match and create an entire match dataframe
     ******************************************
+    Collect all play-by-play information for a match into a pandas DataFrame
     
     '''
     all_tracking_data_dict = raw_json_file['courtVisionData'][0]['pointsData']
