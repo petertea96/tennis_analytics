@@ -59,3 +59,12 @@ importance <- function(point_x, point_y, game_x, game_y,
 
 
 
+importance(point_x = 7, 
+           point_y = 6,
+           game_x = 6, 
+           game_y = 6, 
+           set_x = 0, 
+           set_y = 1,
+           tiebreak = TRUE, bestof3 = FALSE)
+
+

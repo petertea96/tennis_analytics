@@ -8,7 +8,7 @@ setwd("/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data/")
 playerid_df <- read.csv('collect_data/player_id.csv',stringsAsFactors = FALSE)
 playerid_df$id <- as.integer(playerid_df$id)
 
-atp_pbp_df <- read.csv('./eda/atp_roland_garros_19_20.csv')
+atp_pbp_df <- read.csv('./eda/data/atp_roland_garros_19_20.csv')
 
 atp_pbp_df <- atp_pbp_df %>%
   filter(year != 2018) 
@@ -24,7 +24,7 @@ atp_pbp_df <- atp_pbp_df %>%
   rename(returner_name = name)
 
 write.csv(atp_pbp_df,
-          'atp_pbp_df.csv', 
+          './eda/atp_roland_garros_pbp_df.csv', 
           row.names = FALSE)
 
 
@@ -51,7 +51,7 @@ atp_to_plot <- atp_pbp_df %>%
 #          server_name, returner_name, point_end_type) %>%
 #   filter(server_name == player_name | returner_name == player_name)
 
-write.csv(shapo_data,'shapovalov.csv', row.names = FALSE)
+#write.csv(shapo_data,'shapovalov.csv', row.names = FALSE)
 
 
 atp_to_plot$serve_dir <- factor(atp_to_plot$serve_dir,
