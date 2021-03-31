@@ -299,6 +299,13 @@ def get_match_point_level_info(raw_json_file):
     match_point_df['is_tiebreak'] = np.where(match_point_df['game_num'] > 12,
                                              1, 0)
     
+    # -- Add ace flag
+    match_point_df['is_prev_doublefault'] = np.insert(arr = match_point_df['is_doublefault'][:-1].values, obj=0, values=0)
+    
+    # -- Add previous serve was ace / double fault flag
+    match_point_df['is_ace'] =  np.where(match_point_df['point_end_type'] == 'Ace',1,0)
+    match_point_df['is_prev_ace'] = np.insert(arr = match_point_df['is_ace'][:-1].values, obj=0, values=0)
+    
     # -- Add server score & returner score columns
     match_point_df = add_server_and_returner_scores(match_point_df)
     

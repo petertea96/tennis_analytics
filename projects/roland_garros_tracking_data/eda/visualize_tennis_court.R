@@ -46,38 +46,50 @@ draw_half_tennis_court <- function(){
   list(
     # -- Two outer doubles lines
     geom_rect(mapping=aes(xmin=-1, xmax=11.89, ymin=-5.485, ymax=-4.115), 
-              color="black", alpha=0.5, fill = 'grey'), 
+              size = 0.75,
+              color="white", alpha=0.25, fill = '#3C638E'), 
     geom_rect(mapping=aes(xmin=-1, xmax=11.89, ymin= 4.115, ymax= 5.485), 
-              color="black", alpha=0.5, fill = 'grey'),
+              size = 0.75,
+              color="white", alpha=0.25, fill = '#3C638E'),
     # -- Service boxes
     geom_rect(mapping=aes(xmin=-1, xmax=0, ymin=-4.115, ymax=0), 
-              color="black", size = 0.75, alpha=0.5, fill = 'lightgreen'), 
+              color="white", size = 0.75, alpha=0.25, fill = '#3C638E'), 
     geom_rect(mapping=aes(xmin=0, xmax=6.4, ymin=0, ymax=-4.115), 
-              color="black", size = 0.75, alpha=0.5, fill = 'lightgreen'),
+              color="white", size = 0.75, alpha=0.25, fill = '#3C638E'),
     geom_rect(mapping=aes(xmin=-1, xmax=0, ymin=0, ymax= 4.115), 
-              color="black", size = 0.75, alpha=0.5, fill = 'lightgreen'), 
+              color="white", size = 0.75, alpha=0.25, fill = '#3C638E'), 
     geom_rect(mapping=aes(xmin=0, xmax=6.4, ymin=0, ymax=4.115), 
-              color="black", size = 0.75, alpha=0.5, fill = 'lightgreen'),
+              color="white", size = 0.75, alpha=0.25, fill = '#3C638E'),
     # -- Baseline
     #geom_rect(mapping=aes(xmin=-11.89, xmax=-6.4, ymin=-4.115, ymax=4.115), 
     #          color="black", alpha=0.5, fill = 'white'),
     geom_rect(mapping=aes(xmin=6.4, xmax=11.89, ymin=-4.115, ymax=4.115), 
-              color="black", alpha=0.05, fill = 'lightgreen'),
+              color="white", alpha=0.25, fill = '#3C638E'),
     
     # -- Emphasize the net
     geom_segment(aes(x = 0, xend = 0, y = -5.485, yend = 5.485),
-                 size = 1), 
+                 size = 1.25, colour = '#a9a9a9'), 
     # -- Add dashed lines separating 3 serve locations
     geom_segment(aes(x = -1, xend = 6.4, y = 1.37, yend = 1.37),
-                 size = 0.25, linetype='dashed', colour = '#505050'),
+                 size = 0.05, linetype='dashed', colour = 'white'),
     geom_segment(aes(x = -1, xend = 6.4, y = 2*1.37, yend = 2*1.37),
-                   size = 0.25, linetype='dashed', colour = '#505050'),
+                   size = 0.05, linetype='dashed', colour = 'white'),
     geom_segment(aes(x = -1, xend = 6.4, y = -1.37, yend = -1.37),
-                 size = 0.25, linetype='dashed', colour = '#505050'),
+                 size = 0.05, linetype='dashed', colour = 'white'),
     geom_segment(aes(x = -1, xend = 6.4, y = -2*1.37, yend = -2*1.37),
-                 size = 0.25, linetype='dashed', colour = '#505050'),
-    labs(x = '', y = ''))
-  
+                 size = 0.05, linetype='dashed', colour = 'white'),
+    labs(x = '', y = ''),
+    theme_classic(),
+    theme(panel.background = element_rect(fill="#aaf0d1"), #99e6b3
+          plot.title = element_text(hjust = 0.5, face = "bold"),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.y=element_blank(),
+          axis.line=element_blank(),
+          strip.text = element_text(colour = 'black',face = 'bold'))
+    
+    )
 }
 
 ggplot() + 
@@ -91,6 +103,12 @@ ggplot() +
 
 training_data <- read.csv('./processed_roland_garros_tracking_data.csv',
                           stringsAsFactors = FALSE)
+
+# training_data %>%
+#   filter(is_track_avail) %>%
+#   filter(returner_hand=='left-handed') %>%
+#   group_by(returner_name) %>%
+#   summarise(count = n())
 
 players_of_interest <- c('R.NADAL', 'R.FEDERER', 'N.DJOKOVIC',
                          'D.THIEM', 'S.TSITSIPAS', 'A.ZVEREV',
@@ -132,7 +150,7 @@ ggplot(data = plot_serve_loc_data_deuce,
        y = "",
        title = 'Serve Locations on Deuce Court')
 
-ggsave('serve_loc_on_deuce.jpg',
+ggsave('fullcourt_serve_loc_on_deuce.jpg',
        width=7.25, height=5,
        dpi = 400)
 
@@ -153,7 +171,7 @@ ggplot(data = plot_serve_loc_data_ad,
   labs(x = "", 
        y = "",
        title = 'Serve Locations on Advantage Court')
-ggsave('serve_loc_on_ad.jpg',
+ggsave('fullcourt_serve_loc_on_ad.jpg',
        width=7.25, height=5,
        dpi = 400)
 
@@ -174,10 +192,10 @@ plot_one_court_data <- training_data %>%
 
 # Note: Something weird happening. Seems like some serves are hit backwards...
 summary(plot_one_court_data$x_coord)
-plot_one_court_data %>%
-  filter(x_coord < -8) %>%
-  select(serveBounceCordinate_x, serveBounceCordinate_y, court_side, which_side, x_coord, y_coord) %>%
-  View()
+# plot_one_court_data %>%
+#   filter(x_coord < -8) %>%
+#   select(serveBounceCordinate_x, serveBounceCordinate_y, court_side, which_side, x_coord, y_coord) %>%
+#   View()
 
 
 plot_one_court_data %>%
@@ -194,7 +212,8 @@ plot_one_court_data %>%
                   alpha = .5)+
   scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
   facet_wrap(~server_name) + 
-  theme_bw() + 
+  #theme_classic() +
+  #theme_bw() + 
   theme(strip.background =element_rect(fill="#f7e3c3"))+
   theme(strip.text = element_text(colour = 'black',face = 'bold'),
         plot.title = element_text(hjust = 0.5))+
@@ -219,13 +238,10 @@ plot_one_court_data %>%
                   alpha = .5)+
   scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
   facet_wrap(~server_name) + 
-  theme_bw() + 
   theme(strip.background =element_rect(fill="#f7e3c3"))+
-  theme(strip.text = element_text(colour = 'black',face = 'bold'),
-        plot.title = element_text(hjust = 0.5))+
   labs(x = "", 
        y = "",
-       title = "Men'sRoland Garros 2019-20 Serve Locations on Deuce Court") 
+       title = "Men's Roland Garros 2019-20 Serve Locations\n on Deuce Court") 
   
 ggsave('atp_serve_loc_on_deuce.jpg',
        width=7.25, height=4,
@@ -244,10 +260,16 @@ ggsave('atp_serve_loc_on_deuce.jpg',
 #       Serve locations of right vs. left handed returners      -----    
 # ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
 
+# training_data %>%
+#   filter(is_track_avail) %>%
+#   filter(serve_num == 2) %>%
+#   group_by(returner_hand) %>%
+#   summarise(count = n())
+
 courtside.labs <- c("Advantage Court", "Deuce Court")
 names(courtside.labs) <- c("AdCourt", "DeuceCourt")
 
-handedness.labs <- c("Returner: Left-Handed", "Returner: Right-Handed")
+handedness.labs <- c("vs. Left-Handed Returners", "vs. Right-Handed Returners")
 names(handedness.labs) <- c("left-handed", "right-handed")
 
 training_data %>%
@@ -275,20 +297,14 @@ training_data %>%
   facet_grid(court_side ~ returner_hand,
              labeller = labeller(court_side = courtside.labs,
                                  returner_hand = handedness.labs)) + 
-  theme_bw() + 
   theme(strip.background =element_rect(fill="#f7e3c3"))+
-  theme(strip.text = element_text(colour = 'black',face = 'bold'),
-        plot.title = element_text(hjust = 0.5),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank())+
   labs(x = "", 
        y = "",
-       title = "Men's 2nd Serve Locations against Returner Handedness") 
+       title = "ATP 2nd Serve Locations",
+       caption = 'Data: Roland Garros 2019-20') 
 
 ggsave('atp_serve_loc_against_returner_handedness.jpg',
-       width=6, height=5,
+       width=7, height=5,
        dpi = 400)
 
 # ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
@@ -308,10 +324,8 @@ plot_one_court_data %>%
                   alpha = .5)+
   scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
   facet_wrap(~server_name) + 
-  theme_bw() + 
+  theme_classic() + 
   theme(strip.background =element_rect(fill="#f7e3c3"))+
-  theme(strip.text = element_text(colour = 'black',face = 'bold'),
-        plot.title = element_text(hjust = 0.5))+
   labs(x = "", 
        y = "",
        title = 'Safe Serve Locations\n on Deuce Court') 
@@ -331,7 +345,6 @@ plot_one_court_data %>%
                   alpha = .5)+
   scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
   facet_wrap(~server_name) + 
-  theme_bw() + 
   theme(strip.background =element_rect(fill="#f7e3c3"))+
   theme(strip.text = element_text(colour = 'black',face = 'bold'),
         plot.title = element_text(hjust = 0.5))+
@@ -369,17 +382,10 @@ training_data %>%
   scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
   #facet_wrap(~ court_side + returner_hand ) + 
   facet_grid(court_side~server_name) + 
-  theme_bw() + 
   theme(strip.background =element_rect(fill="#f7e3c3"))+
-  theme(strip.text = element_text(colour = 'black',face = 'bold'),
-        plot.title = element_text(hjust = 0.5),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank())+
   labs(x = "", 
        y = "",
-       title = "Men's 2nd Serve Locations against Returner Handedness") 
+       title = "ATP Serve Locations on Break Point") 
 
 ggsave('atp_serve_loc_against_returner_handedness.jpg',
        width=6, height=5,
@@ -394,7 +400,21 @@ players_of_interest <- c('S.KENIN', 'S.HALEP', 'C.GARCIA',
 training_data <- read.csv('./processed_wta_roland_garros_tracking_data.csv',
                           stringsAsFactors = FALSE)
 
+
+
 # -- WTA players serve location against Returner Handedness -----
+
+training_data %>%
+  filter(is_track_avail) %>%
+  filter(serve_num == 2) %>%
+  group_by(returner_hand) %>%
+  summarise(count = n())
+
+# training_data %>%
+#   filter(returner_hand == 'left-handed') %>%
+#   View()
+
+
 training_data %>%
   filter(is_track_avail) %>%
   #filter(server_name %in% players_of_interest) %>%
@@ -420,20 +440,15 @@ training_data %>%
   facet_grid(court_side ~ returner_hand,
              labeller = labeller(court_side = courtside.labs,
                                  returner_hand = handedness.labs)) + 
-  theme_bw() + 
   theme(strip.background =element_rect(fill="#f7e3c3"))+
-  theme(strip.text = element_text(colour = 'black',face = 'bold'),
-        plot.title = element_text(hjust = 0.5),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank())+
   labs(x = "", 
        y = "",
-       title = "Women's 2nd Serve Locations against Returner Handedness") 
+       title = "WTA 2nd Serve Locations",
+       caption = 'Data: Roland Garros 2019-20') 
+
 
 ggsave('wta_serve_loc_against_returner_handedness.jpg',
-       width=6, height=5,
+       width=7, height=5,
        dpi = 400)
 
 
@@ -462,10 +477,7 @@ plot_one_court_data %>%
                   alpha = .5)+
   scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
   facet_wrap(~server_name) + 
-  theme_bw() + 
   theme(strip.background =element_rect(fill="#f7e3c3"))+
-  theme(strip.text = element_text(colour = 'black',face = 'bold'),
-        plot.title = element_text(hjust = 0.5))+
   labs(x = "", 
        y = "",
        title = 'Roland Garros 2019-20 Serve Locations on Advantage Court')
@@ -487,10 +499,7 @@ plot_one_court_data %>%
                   alpha = .4)+
   scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
   facet_wrap(~server_name) + 
-  theme_bw() + 
-  theme(strip.background =element_rect(fill="#f7e3c3"))+
-  theme(strip.text = element_text(colour = 'black',face = 'bold'),
-        plot.title = element_text(hjust = 0.5))+
+  theme(strip.background =element_rect(fill="#f7e3c3")) +
   labs(x = "", 
        y = "",
        title = 'Roland Garros 2019-20 Serve Locations on Deuce Court') 
