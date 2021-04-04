@@ -2,9 +2,6 @@
 
 This repo contains a bunch of raw web scraping and json processing scripts.
 
-`ao_matches`
-* See all Australian Open matches available
-
 `catalogue_player_ids`
 * Create data frame of player names and associated player IDs (Roland Garros)
 * !!! Need to do the same for Australian Open !!!
@@ -27,3 +24,5 @@ This repo contains a bunch of raw web scraping and json processing scripts.
 * Use functions in src `.py` file to tidy all json files into one .csv file (kind of like what Jeff Sackmann does)
 * Create separate files for ATP and WTA matches.
 
+`feature_engineering_in_R.R`
+* Some extra feature engineering items, done in R
