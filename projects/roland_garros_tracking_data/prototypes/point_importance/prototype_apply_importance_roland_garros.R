@@ -5,7 +5,8 @@ library(ggplot2)
 
 setwd("/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data/")
 
-atp_pbp_df <- read.csv('./eda/data/atp_roland_garros_19_20.csv')
+atp_pbp_df <- read.csv('./collect_data/data/atp_roland_garros_19_20.csv')
+wta_pbp_df <- read.csv('./collect_data/data/wta_roland_garros_19_20.csv')
 
 playerid_df <- read.csv('collect_data/data/roland_garros_player_id.csv',
                         stringsAsFactors = FALSE)
@@ -31,16 +32,19 @@ playerid_df$id <- as.integer(playerid_df$id)
 training_data <- atp_pbp_df %>%
   select(point_ID, set_num, game_num, point_num, serve_num,
          server_id, returner_id, point_winner_id, 
-         server_score, returner_score, player1, player2,
-         p1_cum_games, p2_cum_games, p1_cum_sets, p2_cum_sets,
-         court_side, is_break_point,
-         is_break_point_converted, is_track_avail, serve_dir, 
-         is_fault, is_doublefault, is_tiebreak,
-         match_id, year
-         #z_net_serve, serve_speed_kph, serve_type, y_ball_at_serve,
+         court_side, serve_speed_kph, y_ball_at_serve, 
+         rally_length, point_end_type, is_break_point,
+         is_break_point_converted, is_track_avail,
+         serveBounceCordinate_x, serveBounceCordinate_y,
+         serve_dir, z_net_serve, is_fault, is_doublefault, 
+         is_prev_doublefault, is_ace, is_prev_ace,
+         is_tiebreak, server_score, returner_score, 
+         player1, player2, p1_cum_games, p2_cum_games, 
+         p1_cum_sets, p2_cum_sets, match_id, year, 
+         x_ball_at_serve
          ) %>%
   mutate(
-    #dist_from_center = abs(y_ball_at_serve),
+    dist_from_center = abs(y_ball_at_serve),
     is_break_point = ifelse(is_break_point == 'True',
                             1, 0),
     is_break_point_converted = ifelse(is_break_point_converted == 'True',
@@ -48,22 +52,27 @@ training_data <- atp_pbp_df %>%
     is_track_avail = ifelse(is_track_avail == 'True',
                             TRUE, FALSE),
     is_tiebreak = ifelse(is_tiebreak == 1,
-                         TRUE, FALSE)#,
+                         TRUE, FALSE),
     
-    #serve_speed_kph = as.numeric(gsub("([0-9]+).*$", "\\1", serve_speed_kph))
+    serve_speed_kph = as.numeric(gsub("([0-9]+).*$", "\\1", serve_speed_kph)),
+    which_side = ifelse(x_ball_at_serve > 0, 'right', 'left')
     
   ) %>%
   # -- Add player names
   left_join(playerid_df, by = c('server_id' = 'id')) %>%
-  rename(server_name = name) %>%
+  rename(server_name = name,
+         server_hand = player_handedness) %>%
   left_join(playerid_df, by = c('returner_id' = 'id')) %>%
-  rename(returner_name = name) %>%
+  rename(returner_name = name,
+         returner_hand = player_handedness) %>%
   
   # -- Add player names again denoting player1 or player2 (confusing, I know)
   left_join(playerid_df, by = c('player1' = 'id')) %>%
-  rename(p1_name = name) %>%
+  rename(p1_name = name,
+         p1_hand = player_handedness) %>%
   left_join(playerid_df, by = c('player2' = 'id')) %>%
-  rename(p2_name = name) %>%
+  rename(p2_name = name,
+         p2_hand = player_handedness) %>%
   
   # -- Configure p1 & p2 cumulative games/sets into server & returner
   mutate(
@@ -96,6 +105,64 @@ training_data %>%
             df_rate = df/tot_serves) %>%
   View()
   
+
+# -- Repeat for WTA
+# training_data <- wta_pbp_df %>%
+#   select(point_ID, set_num, game_num, point_num, serve_num,
+#          server_id, returner_id, point_winner_id, 
+#          court_side, serve_speed_kph, y_ball_at_serve, 
+#          rally_length, point_end_type, is_break_point,
+#          is_break_point_converted, is_track_avail,
+#          serveBounceCordinate_x, serveBounceCordinate_y,
+#          serve_dir, z_net_serve, is_fault, is_doublefault, 
+#          is_prev_doublefault, is_ace, is_prev_ace,
+#          is_tiebreak, server_score, returner_score, 
+#          player1, player2, p1_cum_games, p2_cum_games, 
+#          p1_cum_sets, p2_cum_sets, match_id, year, 
+#          x_ball_at_serve
+#   ) %>%
+#   mutate(
+#     dist_from_center = abs(y_ball_at_serve),
+#     is_break_point = ifelse(is_break_point == 'True',
+#                             1, 0),
+#     is_break_point_converted = ifelse(is_break_point_converted == 'True',
+#                                       1, 0),
+#     is_track_avail = ifelse(is_track_avail == 'True',
+#                             TRUE, FALSE),
+#     is_tiebreak = ifelse(is_tiebreak == 1,
+#                          TRUE, FALSE),
+#     
+#     serve_speed_kph = as.numeric(gsub("([0-9]+).*$", "\\1", serve_speed_kph)),
+#     which_side = ifelse(x_ball_at_serve > 0, 'right', 'left')
+#     
+#   ) %>%
+#   # -- Add player names
+#   left_join(playerid_df, by = c('server_id' = 'id')) %>%
+#   rename(server_name = name,
+#          server_hand = player_handedness) %>%
+#   left_join(playerid_df, by = c('returner_id' = 'id')) %>%
+#   rename(returner_name = name,
+#          returner_hand = player_handedness) %>%
+#   
+#   # -- Add player names again denoting player1 or player2 (confusing, I know)
+#   left_join(playerid_df, by = c('player1' = 'id')) %>%
+#   rename(p1_name = name,
+#          p1_hand = player_handedness) %>%
+#   left_join(playerid_df, by = c('player2' = 'id')) %>%
+#   rename(p2_name = name,
+#          p2_hand = player_handedness) %>%
+#   
+#   # -- Configure p1 & p2 cumulative games/sets into server & returner
+#   mutate(
+#     s_cum_games = ifelse(server_name == p1_name,
+#                          p1_cum_games, p2_cum_games),
+#     r_cum_games = ifelse(returner_name == p1_name,
+#                          p1_cum_games, p2_cum_games),
+#     s_cum_sets = ifelse(server_name == p1_name,
+#                         p1_cum_sets, p2_cum_sets),
+#     r_cum_sets = ifelse(returner_name == p1_name,
+#                         p1_cum_sets, p2_cum_sets)
+#   )
 
 # ***************************
 # -- Code accepts deuce scores as 3 - 3 
@@ -198,6 +265,12 @@ training_data_with_importance <-
   )
 
 summary(training_data_with_importance$point_importance)
+
+
+write.csv(training_data_with_importance,
+          'processed_roland_garros_tracking_data.csv',
+          row.names = FALSE)
+
 
 # -- Not apppropriate to include 5th set tiebreaks
 table(training_data_with_importance$game_num)
