@@ -1,6 +1,10 @@
 # ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
 # --                EDA for Quantifying Risky Serves            -----
 # ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
+# Serve Speed densities by Serve Number
+# Serve Speed densities by Faults
+# Serve Speed vs Net clearance
+# Serve Net Clearance densities
 
 library(dplyr)
 library(ggplot2)
@@ -8,7 +12,7 @@ library(ggridges)
 
 setwd("/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data/")
 
-training_data <- read.csv('./processed_roland_garros_tracking_data.csv',
+training_data <- read.csv('./atp_processed_roland_garros_tracking_data.csv',
                           stringsAsFactors = FALSE)
 
 

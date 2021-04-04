@@ -8,7 +8,7 @@ library(ggplot2)
 
 setwd("/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data/")
 
-atp_pbp_df <- read.csv('./eda/atp_roland_garros_pbp_df.csv')
+atp_pbp_df <- read.csv('atp_processed_roland_garros_tracking_data.csv')
 
 # -- which players appear most frequently in the data?
 sort(table(atp_pbp_df$server_name),decreasing = TRUE) %>%
@@ -33,10 +33,10 @@ djokovic_df <- atp_pbp_df %>%
 # *** Can we distinguish serves by net clearance? ***
 
 # -- Look at Differences in net clearance between 1st vs 2nd serve
-atp_pbp_df %>%
-  group_by(server_name, serve_num) %>%
-  summarise(avg_net_height = mean(z_net_serve, na.rm = TRUE)) %>%
-  View()
+# atp_pbp_df %>%
+#   group_by(server_name, serve_num) %>%
+#   summarise(avg_net_height = mean(z_net_serve, na.rm = TRUE)) %>%
+#   View()
 # There's around a 10cm difference between 1st and 2nd serve in ball net height
 # -- Most players (except Krajinovic, Jannik) has net height around 1.12m on 1st serve, and
 #    above 1.2m on 2nd serve
@@ -47,10 +47,10 @@ ggplot(data = atp_pbp_df,
   labs(fill="Serve Number")
 
 # -- Meanwhile, Differences in net clearance between Ad. vs Deuce court are minuscule
-atp_pbp_df %>%
-  group_by(server_name, court_side) %>%
-  summarise(avg_net_height = mean(z_net_serve, na.rm = TRUE)) %>%
-  View()
+# atp_pbp_df %>%
+#   group_by(server_name, court_side) %>%
+#   summarise(avg_net_height = mean(z_net_serve, na.rm = TRUE)) %>%
+#   View()
 
 ggplot(data = atp_pbp_df, 
        aes(x = z_net_serve, fill = as.factor(court_side))) +
