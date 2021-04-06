@@ -45,7 +45,7 @@ draw_half_tennis_court <- function(){
                  size = 0.05, linetype='dashed', colour = 'white'),
     labs(x = '', y = ''),
     theme_classic(),
-    theme(panel.background = element_rect(fill="#aaf0d1"), #99e6b3
+    theme(panel.background = element_rect(fill="#ad5049"), #99e6b3,#aaf0d1 <-- Miami teal colours
           plot.title = element_text(hjust = 0.5, face = "bold"),
           axis.text.x=element_blank(),
           axis.ticks.x=element_blank(),
