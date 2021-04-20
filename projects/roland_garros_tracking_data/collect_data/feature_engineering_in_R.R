@@ -7,13 +7,20 @@
 # ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
 # ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
 
-## * Add player handedness
-## * Add point importance
-## * Remove matches with insufficient amount of tracking points
-## * Impute targeted serve direction for net faults
-## * Figure out why splitting data into right/left side still leaves
+## [*] Add player handedness
+## [*] Add point importance
+## [*] Remove matches with insufficient amount of tracking points
+## [*] Impute targeted serve direction for net faults
+## [*] Re-categorise the 'intended' serve directions
+## [*] Add previous serve location (lag 1 and lag 2)
+## [*] Add scaled point importance within a match (min-max normalization and z normalization)
+## [*] Serve direction targets backhand
+## [ ] Transform ball toss and ball lateral position (ad vs. deuce & left vs right courts)
+##      x --> Distance inside the court
+##      y --> lateral position???
+## [ ] Figure out why splitting data into right/left side still leaves
 ##     some highly negative x coordinate values.
-## * Repeat for Australian Open Data
+## [ ] Repeat for Australian Open Data
 
 
 # ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
@@ -25,6 +32,10 @@ setwd("/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data/")
 
 load(file = "/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data/src/importance.RData")
 source(file = "/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data/src/importance.R")
+source(file = "/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data/src/impute_serve_location.R")
+source(file = "/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data/src/categorise_serve_direction.R")
+#source(file = "/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data/src/helper_functions.R")
+
 
 atp_rolandgarros_pbp_df <- read.csv('./collect_data/data/atp_roland_garros_19_20.csv')
 wta_rolandgarros_pbp_df <- read.csv('./collect_data/data/wta_roland_garros_19_20.csv')
@@ -53,7 +64,9 @@ atp_rolandgarros_training_data <- atp_rolandgarros_pbp_df %>%
          trapped_by_net,
          is_break_point, is_break_point_converted, is_track_avail,
          serveBounceCordinate_x, serveBounceCordinate_y,
-         serve_dir, z_net_serve, is_fault, is_doublefault, 
+         serve_dir, 
+         x_net_serve, y_net_serve, z_net_serve, 
+         is_fault, is_doublefault, 
          is_prev_doublefault, is_ace, is_prev_ace,
          is_tiebreak, server_score, returner_score, 
          player1, player2, p1_cum_games, p2_cum_games, 
@@ -61,7 +74,7 @@ atp_rolandgarros_training_data <- atp_rolandgarros_pbp_df %>%
          cruciality
   ) %>%
   mutate(
-    server_dist_from_center = abs(y_ball_at_serve),
+    serve_impact_from_center = abs(y_ball_at_serve),
     is_break_point = ifelse(is_break_point == 'True',
                             1, 0),
     is_break_point_converted = ifelse(is_break_point_converted == 'True',
@@ -75,8 +88,45 @@ atp_rolandgarros_training_data <- atp_rolandgarros_pbp_df %>%
     which_side = ifelse(x_ball_at_serve > 0, 'right', 'left'),
     fault_distance_missed_m = ifelse(is.na(fault_distance_missed_m),
                                      '0.0 Metre', fault_distance_missed_m),
+    
+    # -- Error Type
     error_type = ifelse(is.na(error_type),
-                        'None', error_type)
+                        'None', error_type),
+    # # -- Classify Net Fault Error types
+    # error_type = ifelse( ((is_fault == 1) & (z_net_serve <= get_net_height(y_coordinate= y_net_serve))),
+    #                      'Net Error',
+    #                      error_type),
+    
+    # intended_serve_bounce_x = ifelse(error_type == 'Net Error',
+    #                                  get_intended_serve_bounce_loc(x_ball_at_serve = x_ball_at_serve,
+    #                                                                y_ball_at_serve = y_ball_at_serve,
+    #                                                                z_ball_at_serve = z_ball_at_serve,
+    #                                                                y_net_serve = y_net_serve,
+    #                                                                z_net_serve = z_net_serve)[1],
+    #                                  serveBounceCordinate_x),
+    # intended_serve_bounce_y = ifelse(error_type == 'Net Error',
+    #                                  get_intended_serve_bounce_loc(x_ball_at_serve = x_ball_at_serve,
+    #                                                                y_ball_at_serve = y_ball_at_serve,
+    #                                                                z_ball_at_serve = z_ball_at_serve,
+    #                                                                y_net_serve = y_net_serve,
+    #                                                                z_net_serve = z_net_serve)[2],
+    #                                  serveBounceCordinate_y),
+    
+    # -- Transform all coordinates to lie on the right part of the court.
+    # Is it appropriate to take the absolute value?
+    # On the right side of court, x_coord is always positive. However, y coord can be
+    # (+) on Deuce or (-) on AdCourt
+    # x_coord = ifelse( (which_side == 'right'), 
+    #                   abs(intended_serve_bounce_x),
+    #                   intended_serve_bounce_x),
+    # # Something funky with some left side serves (all faults) being recorded as highly (-).
+    # x_coord = ifelse( ((which_side == 'left') & (x_coord < 0)),
+    #                   abs(x_coord),
+    #                   x_coord),
+    # y_coord = ifelse( (which_side == 'right'),
+    #                   -1*(intended_serve_bounce_y),
+    #                   intended_serve_bounce_y)
+    
     
     
   ) %>%
@@ -107,6 +157,37 @@ atp_rolandgarros_training_data <- atp_rolandgarros_pbp_df %>%
     r_cum_sets = ifelse(returner_name == p1_name,
                         p1_cum_sets, p2_cum_sets)
   )
+
+
+# -- Check that imputed serve directions actually make sense...
+# -- Something messed up with dplyr::mutate() when you're using your own functions...
+
+atp_rolandgarros_training_data <- atp_rolandgarros_training_data %>%
+  dplyr::rowwise() %>%
+  dplyr::mutate(    
+    # -- Classify Net Fault Error types
+    error_type = ifelse( ((is_fault == 1) & (z_net_serve <= get_net_height(y_coordinate= y_net_serve))),
+                         'Net Error',
+                         error_type),
+    intended_serve_bounce_x = ifelse(error_type == 'Net Error',
+                                 get_intended_serve_bounce_loc(x_ball_at_serve = x_ball_at_serve,
+                                                               y_ball_at_serve = y_ball_at_serve,
+                                                               z_ball_at_serve = z_ball_at_serve,
+                                                               y_net_serve = y_net_serve,
+                                                               z_net_serve = z_net_serve)[1],
+                                 serveBounceCordinate_x),
+         intended_serve_bounce_y = ifelse(error_type == 'Net Error',
+                                 get_intended_serve_bounce_loc(x_ball_at_serve = x_ball_at_serve,
+                                                               y_ball_at_serve = y_ball_at_serve,
+                                                               z_ball_at_serve = z_ball_at_serve,
+                                                               y_net_serve = y_net_serve,
+                                                               z_net_serve = z_net_serve)[2],
+                                 serveBounceCordinate_y))
+
+# Convert your column lists into a dataframe
+atp_rolandgarros_training_data <- as.data.frame(lapply(atp_rolandgarros_training_data,unlist)) 
+
+#atp_rolandgarros_training_data %>% filter(error_type == 'Net Error') %>% View()
 
 
 # -- Do the same for WTA
@@ -119,7 +200,9 @@ wta_rolandgarros_training_data <- wta_rolandgarros_pbp_df %>%
          trapped_by_net,
          is_break_point, is_break_point_converted, is_track_avail,
          serveBounceCordinate_x, serveBounceCordinate_y,
-         serve_dir, z_net_serve, is_fault, is_doublefault, 
+         serve_dir,
+         x_net_serve, y_net_serve, z_net_serve, 
+         is_fault, is_doublefault, 
          is_prev_doublefault, is_ace, is_prev_ace,
          is_tiebreak, server_score, returner_score, 
          player1, player2, p1_cum_games, p2_cum_games, 
@@ -127,7 +210,7 @@ wta_rolandgarros_training_data <- wta_rolandgarros_pbp_df %>%
          cruciality
   ) %>%
   mutate(
-    server_dist_from_center = abs(y_ball_at_serve),
+    serve_impact_from_center = abs(y_ball_at_serve),
     is_break_point = ifelse(is_break_point == 'True',
                             1, 0),
     is_break_point_converted = ifelse(is_break_point_converted == 'True',
@@ -142,7 +225,42 @@ wta_rolandgarros_training_data <- wta_rolandgarros_pbp_df %>%
     fault_distance_missed_m = ifelse(is.na(fault_distance_missed_m),
                                      '0.0 Metre', fault_distance_missed_m),
     error_type = ifelse(is.na(error_type),
-                        'None', error_type)
+                        'None', error_type),
+    # -- Classify Net Fault Error types
+    # error_type = ifelse( ((is_fault == 1) & (z_net_serve <= get_net_height(y_coordinate= y_net_serve))),
+    #                      'Net Error',
+    #                      error_type),
+    # 
+    # intended_serve_bounce_x = ifelse(error_type == 'Net Error',
+    #                                  get_intended_serve_bounce_loc(x_ball_at_serve = x_ball_at_serve,
+    #                                                                y_ball_at_serve = y_ball_at_serve,
+    #                                                                z_ball_at_serve = z_ball_at_serve,
+    #                                                                y_net_serve = y_net_serve,
+    #                                                                z_net_serve = z_net_serve)[1],
+    #                                  serveBounceCordinate_x),
+    # intended_serve_bounce_y = ifelse(error_type == 'Net Error',
+    #                                  get_intended_serve_bounce_loc(x_ball_at_serve = x_ball_at_serve,
+    #                                                                y_ball_at_serve = y_ball_at_serve,
+    #                                                                z_ball_at_serve = z_ball_at_serve,
+    #                                                                y_net_serve = y_net_serve,
+    #                                                                z_net_serve = z_net_serve)[2],
+    #                                  serveBounceCordinate_y),
+    
+    
+    # -- Transform all coordinates to lie on the right part of the court.
+    # Is it appropriate to take the absolute value?
+    # On the right side of court, x_coord is always positive. However, y coord can be
+    # (+) on Deuce or (-) on AdCourt
+    # x_coord = ifelse( (which_side == 'right'), 
+    #                   abs(intended_serve_bounce_x),
+    #                   intended_serve_bounce_x),
+    # # Something funky with some left side serves (all faults) being recorded as highly (-).
+    # x_coord = ifelse( ((which_side == 'left') & (x_coord < 0)),
+    #                   abs(x_coord),
+    #                   x_coord),
+    # y_coord = ifelse( (which_side == 'right'),
+    #                   -1*(intended_serve_bounce_y),
+    #                   intended_serve_bounce_y)
     
   ) %>%
   # -- Add player names
@@ -173,7 +291,29 @@ wta_rolandgarros_training_data <- wta_rolandgarros_pbp_df %>%
                         p1_cum_sets, p2_cum_sets)
   )
 
+wta_rolandgarros_training_data <- wta_rolandgarros_training_data %>%
+  rowwise() %>%
+  mutate(    
+    # -- Classify Net Fault Error types
+    error_type = ifelse( ((is_fault == 1) & (z_net_serve <= get_net_height(y_coordinate= y_net_serve))),
+                         'Net Error',
+                         error_type),
+    intended_serve_bounce_x = ifelse(error_type == 'Net Error',
+                                     get_intended_serve_bounce_loc(x_ball_at_serve = x_ball_at_serve,
+                                                                   y_ball_at_serve = y_ball_at_serve,
+                                                                   z_ball_at_serve = z_ball_at_serve,
+                                                                   y_net_serve = y_net_serve,
+                                                                   z_net_serve = z_net_serve)[1],
+                                     serveBounceCordinate_x),
+    intended_serve_bounce_y = ifelse(error_type == 'Net Error',
+                                     get_intended_serve_bounce_loc(x_ball_at_serve = x_ball_at_serve,
+                                                                   y_ball_at_serve = y_ball_at_serve,
+                                                                   z_ball_at_serve = z_ball_at_serve,
+                                                                   y_net_serve = y_net_serve,
+                                                                   z_net_serve = z_net_serve)[2],
+                                     serveBounceCordinate_y))
 
+wta_rolandgarros_training_data <- as.data.frame(lapply(wta_rolandgarros_training_data,unlist)) 
 # ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
 ### --             Apply Point Importance                       -----
 # ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
@@ -341,10 +481,6 @@ atp_ineligible_match_ids <- atp_rolandgarros_training_data_with_importance %>%
 atp_rolandgarros_training_data_with_importance <- atp_rolandgarros_training_data_with_importance %>%
   filter( !(match_id %in% atp_ineligible_match_ids) )
 
-write.csv(atp_rolandgarros_training_data_with_importance,
-          'atp_processed_roland_garros_tracking_data.csv',
-          row.names = FALSE)
-
 
 # -- Finish with WTA
 wta_ineligible_match_ids <- wta_rolandgarros_training_data_with_importance %>%
@@ -358,8 +494,229 @@ wta_ineligible_match_ids <- wta_rolandgarros_training_data_with_importance %>%
 wta_rolandgarros_training_data_with_importance <- wta_rolandgarros_training_data_with_importance %>%
   filter( !(match_id %in% wta_ineligible_match_ids) )
 
-write.csv(wta_rolandgarros_training_data_with_importance,
-          'wta_processed_roland_garros_tracking_data.csv',
+
+# ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
+# -- recategorise intended serve direction -----
+# ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
+
+# -- Check that all serve direction changes only happen on Net Errors
+atp_rolandgarros_training_data_with_importance %>%
+  rowwise() %>% 
+  mutate(
+    intended_serve_dir = categorise_serve_direction(intended_serve_bounce_y)) %>%
+  group_by(error_type) %>%
+  summarise(num_changes = sum(!(serve_dir == intended_serve_dir), na.rm = T),
+            num_no_changes = sum((serve_dir == intended_serve_dir), na.rm = T))
+
+# -- Add intended serve direction column
+atp_rolandgarros_training_data_with_importance <- 
+atp_rolandgarros_training_data_with_importance %>%
+  rowwise() %>% 
+  mutate(
+    # -- Sometimes, Tracking data is available... except for net coordinates. In these cases
+    #    use the original serve direction.
+    intended_serve_dir = ifelse(!is.na(categorise_serve_direction(intended_serve_bounce_y)),
+                                categorise_serve_direction(intended_serve_bounce_y),
+                                serve_dir)
+    ) 
+
+# atp_rolandgarros_training_data_with_importance %>%
+#   select(intended_serve_dir, serve_dir) %>%
+#   View()
+
+
+# -- Do the same for WTA
+wta_rolandgarros_training_data_with_importance <- 
+  wta_rolandgarros_training_data_with_importance %>%
+  rowwise() %>% 
+  mutate(
+    # -- Sometimes, Tracking data is available... except for net coordinates. In these cases
+    #    use the original serve direction.
+    intended_serve_dir = ifelse(!is.na(categorise_serve_direction(intended_serve_bounce_y)),
+                                categorise_serve_direction(intended_serve_bounce_y),
+                                serve_dir)
+  ) 
+
+
+# ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
+# -- Add returner's backhand location -----
+# ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
+#colnames(atp_rolandgarros_training_data_with_importance)
+atp_rolandgarros_training_data_with_importance <- 
+atp_rolandgarros_training_data_with_importance %>%
+  mutate(
+    player_hands_match = ifelse(server_hand == returner_hand, 1, 0),
+    returner_backhand_loc = ifelse(  ((court_side == 'AdCourt') & (returner_hand == 'right-handed')),
+                                     'Wide', 
+                                     ifelse( ((court_side == 'DeuceCourt') & (returner_hand == 'right-handed')),
+                                             'T',
+                                             ifelse( ((court_side == 'AdCourt') & (returner_hand == 'left-handed')),
+                                                     'T',
+                                                     ifelse( ((court_side == 'DeuceCourt') & (returner_hand == 'left-handed')), 
+                                                             'Wide', NA) )))
+  )
+
+wta_rolandgarros_training_data_with_importance <- 
+  wta_rolandgarros_training_data_with_importance %>%
+  mutate(
+    player_hands_match = ifelse(server_hand == returner_hand, 1, 0),
+    returner_backhand_loc = ifelse(  ((court_side == 'AdCourt') & (returner_hand == 'right-handed')),
+                                     'Wide', 
+                                     ifelse( ((court_side == 'DeuceCourt') & (returner_hand == 'right-handed')),
+                                             'T',
+                                             ifelse( ((court_side == 'AdCourt') & (returner_hand == 'left-handed')),
+                                                     'T',
+                                                     ifelse( ((court_side == 'DeuceCourt') & (returner_hand == 'left-handed')), 
+                                                             'Wide', NA) )))
+  )
+
+
+# ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
+# -- Add Server's previous intended serve location -----
+# -- Also transform point importance within a match -----
+# ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
+# -- Perform the dreaded for loop...
+atp_match_processed_list <- list()
+
+atp_match_ids <- unique(atp_rolandgarros_training_data_with_importance$match_id)
+for (ID_index in 1:length(atp_match_ids)){
+  # -- Get Match ID in Dataframe
+  ID <- atp_match_ids[ID_index]
+  
+  # -- Subset data to only include the one match 
+  atp_match_df <- atp_rolandgarros_training_data_with_importance %>%
+    filter(match_id == ID) %>%
+    dplyr::distinct() %>% # Some rows seem to repeat (eg: Fed vs Ruud)
+    arrange(server_name, set_num, game_num, point_num, serve_num)
+  
+  # -- Get player names involved in match
+  p1_name <- unique(atp_match_df$server_name)[1]
+  p2_name <- unique(atp_match_df$server_name)[2]
+
+  # -- Player 1's match DataFrame
+  p1_match_df <- atp_match_df %>%
+    filter(server_name == p1_name) 
+  
+  # -- Player 2's match DataFrame
+  p2_match_df <- atp_match_df %>%
+    filter(server_name == p2_name) 
+  
+  # -- Get previous serve locations
+  p1_prev_intended_serve_loc1 <- c(NA, p1_match_df$intended_serve_dir[1:(nrow(p1_match_df)-1)])
+  p1_prev_intended_serve_loc2 <- c(NA, NA, p1_match_df$intended_serve_dir[1:(nrow(p1_match_df)-2)])
+  p2_prev_intended_serve_loc1 <- c(NA, p2_match_df$intended_serve_dir[1:(nrow(p2_match_df)-1)])
+  p2_prev_intended_serve_loc2 <- c(NA, NA, p2_match_df$intended_serve_dir[1:(nrow(p2_match_df)-2)])
+  
+  
+  if( ( length(p1_prev_intended_serve_loc1) != nrow(p1_match_df)) | ( length(p1_prev_intended_serve_loc2) != nrow(p1_match_df)) ){
+    print(ID)
+    break
+  }
+  
+  if( ( length(p2_prev_intended_serve_loc1) != nrow(p2_match_df)) | ( length(p2_prev_intended_serve_loc2) != nrow(p2_match_df)) ){
+    print(ID)
+    break
+  }
+  
+  # -- Add previous serve locations to DataFrame
+  p1_match_df$prev_intended_serve_loc1 <- p1_prev_intended_serve_loc1
+  p1_match_df$prev_intended_serve_loc2 <- p1_prev_intended_serve_loc2
+  p2_match_df$prev_intended_serve_loc1 <- p2_prev_intended_serve_loc1
+  p2_match_df$prev_intended_serve_loc2 <- p2_prev_intended_serve_loc2
+ 
+  # -- Scale Point importance
+  # -- This is fishy since you can't scale point importance when making predictions on a 
+  #    a test set. I.e. you wouldn't know beforehand what the most important points would be.
+  p1_match_df$minmax_scaled_point_importance <- (p1_match_df$point_importance - min(p1_match_df$point_importance)) / (max(p1_match_df$point_importance) - min(p1_match_df$point_importance))
+  p2_match_df$minmax_scaled_point_importance <- (p2_match_df$point_importance - min(p2_match_df$point_importance)) / (max(p2_match_df$point_importance) - min(p2_match_df$point_importance))
+  p1_match_df$z_scaled_point_importance <- scale(p1_match_df$point_importance)
+  p2_match_df$z_scaled_point_importance <- scale(p2_match_df$point_importance)
+  
+  atp_match_processed_list[[ID_index]] <- rbind(p1_match_df, p2_match_df)
+  
+}
+
+atp_match_processed <- do.call(rbind, atp_match_processed_list)
+
+# -- Update the scaling of point importance
+atp_match_processed$minmax_scaled_point_importance <- (atp_match_processed$point_importance - min(atp_match_processed$point_importance)) / (max(atp_match_processed$point_importance) - min(atp_match_processed$point_importance))
+atp_match_processed$z_scaled_point_importance <- scale(atp_match_processed$point_importance)
+
+# -- Now repeat for WTA...
+wta_match_processed_list <- list()
+
+wta_match_ids <- unique(wta_rolandgarros_training_data_with_importance$match_id)
+for (ID_index in 1:length(wta_match_ids)){
+  # -- Get Match ID in Dataframe
+  ID <- wta_match_ids[ID_index]
+  
+  # -- Subset data to only include the one match 
+  wta_match_df <- wta_rolandgarros_training_data_with_importance %>%
+    filter(match_id == ID) %>%
+    dplyr::distinct() %>%
+    arrange(server_name, set_num, game_num, point_num, serve_num)
+  
+  # -- Get player names involved in match
+  p1_name <- unique(wta_match_df$server_name)[1]
+  p2_name <- unique(wta_match_df$server_name)[2]
+  
+  # -- Player 1's match DataFrame
+  p1_match_df <- wta_match_df %>%
+    filter(server_name == p1_name) 
+  
+  # -- Player 2's match DataFrame
+  p2_match_df <- wta_match_df %>%
+    filter(server_name == p2_name) 
+  
+  # -- Get previous serve locations
+  p1_prev_intended_serve_loc1 <- c(NA, p1_match_df$intended_serve_dir[1:(nrow(p1_match_df)-1)])
+  p1_prev_intended_serve_loc2 <- c(NA, NA, p1_match_df$intended_serve_dir[1:(nrow(p1_match_df)-2)])
+  p2_prev_intended_serve_loc1 <- c(NA, p2_match_df$intended_serve_dir[1:(nrow(p2_match_df)-1)])
+  p2_prev_intended_serve_loc2 <- c(NA, NA, p2_match_df$intended_serve_dir[1:(nrow(p2_match_df)-2)])
+  
+  
+  if( ( length(p1_prev_intended_serve_loc1) != nrow(p1_match_df)) | ( length(p1_prev_intended_serve_loc2) != nrow(p1_match_df)) ){
+    print(ID)
+    break
+  }
+  
+  if( ( length(p2_prev_intended_serve_loc1) != nrow(p2_match_df)) | ( length(p2_prev_intended_serve_loc2) != nrow(p2_match_df)) ){
+    print(ID)
+    break
+  }
+  
+  # -- Add previous serve locations to DataFrame
+  p1_match_df$prev_intended_serve_loc1 <- p1_prev_intended_serve_loc1
+  p1_match_df$prev_intended_serve_loc2 <- p1_prev_intended_serve_loc2
+  p2_match_df$prev_intended_serve_loc1 <- p2_prev_intended_serve_loc1
+  p2_match_df$prev_intended_serve_loc2 <- p2_prev_intended_serve_loc2
+  
+  # -- Scale Point importance
+  p1_match_df$minmax_scaled_point_importance <- (p1_match_df$point_importance - min(p1_match_df$point_importance)) / (max(p1_match_df$point_importance) - min(p1_match_df$point_importance))
+  p2_match_df$minmax_scaled_point_importance <- (p2_match_df$point_importance - min(p2_match_df$point_importance)) / (max(p2_match_df$point_importance) - min(p2_match_df$point_importance))
+  p1_match_df$z_scaled_point_importance <- scale(p1_match_df$point_importance)
+  p2_match_df$z_scaled_point_importance <- scale(p2_match_df$point_importance)
+  
+  wta_match_processed_list[[ID_index]] <- rbind(p1_match_df, p2_match_df)
+  
+}
+
+wta_match_processed <- do.call(rbind, wta_match_processed_list)
+# -- Update the scaling of point importance
+wta_match_processed$minmax_scaled_point_importance <- (wta_match_processed$point_importance - min(wta_match_processed$point_importance)) / (max(wta_match_processed$point_importance) - min(wta_match_processed$point_importance))
+wta_match_processed$z_scaled_point_importance <- scale(wta_match_processed$point_importance)
+
+
+
+# ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
+# -- Save the data -----
+# ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
+write.csv(atp_match_processed,
+          './collect_data/data/atp_processed_roland_garros_tracking_data.csv',
+          row.names = FALSE)
+
+write.csv(wta_match_processed,
+          './collect_data/data/wta_processed_roland_garros_tracking_data.csv',
           row.names = FALSE)
 
 
