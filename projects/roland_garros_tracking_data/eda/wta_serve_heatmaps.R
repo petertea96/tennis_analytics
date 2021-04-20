@@ -20,7 +20,7 @@ names(handedness.labs) <- c("left-handed", "right-handed")
 
 players_of_interest <- c('S.KENIN', 'S.HALEP', 'C.GARCIA',
                          'E.SVITOLINA', 'A.BARTY', 'P.KVITOVA')
-training_data <- read.csv('./processed_wta_roland_garros_tracking_data.csv',
+training_data <- read.csv('./collect_data/data/wta_processed_roland_garros_tracking_data.csv',
                           stringsAsFactors = FALSE)
 
 training_data <-
@@ -229,3 +229,44 @@ training_data %>%
        y = "",
        title = "WTA Serve Locations") 
 
+
+
+
+# ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
+# -----   Re-do all plots with intended serve direction         -----    
+# ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
+plot_one_court_data <- training_data %>%
+  filter(is_track_avail) %>%
+  filter(server_name %in% players_of_interest) %>%
+  mutate( x_coord = ifelse( (which_side == 'right'), 
+                            -1 *intended_serve_bounce_x,
+                            intended_serve_bounce_x),
+          
+          y_coord = ifelse( (which_side == 'right'), 
+                            -1 *intended_serve_bounce_y,
+                            intended_serve_bounce_y))
+
+
+plot_one_court_data %>%
+  filter(court_side =='DeuceCourt') %>%
+  #filter(serve_num == 2) %>%
+  #filter(serve_num == 2) %>%
+  filter(x_coord > -2) %>%
+  ggplot(aes(x = x_coord, 
+             y = y_coord)) +
+  draw_half_tennis_court() +
+  stat_density_2d(aes(fill = stat(nlevel)), geom = "polygon",
+                  show.legend = F, 
+                  bins = 15, 
+                  alpha = .5)+
+  scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
+  facet_wrap(~server_name) + 
+  theme(strip.background =element_rect(fill="#f7e3c3"))+
+  labs(x = "", 
+       y = "",
+       title = "Women's Serve Locations on Deuce Court",
+       caption = "Data: Roland Garros 2019-20") 
+
+ggsave('wta_serve_loc_on_deuce.jpg',
+       width=7.25, height=4,
+       dpi = 400)

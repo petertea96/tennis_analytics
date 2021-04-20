@@ -13,7 +13,12 @@ source('src/gg_tennis_court.R')
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-training_data <- read.csv('./processed_roland_garros_tracking_data.csv',
+# *** NOTE ***
+# --> ServeBounce are actual bounce locations
+# --> intended_serve_bounce are imputed serve directions on net faults...heatmaps will
+#     look wonky!
+
+training_data <- read.csv('./collect_data/data/atp_processed_roland_garros_tracking_data.csv',
                           stringsAsFactors = FALSE)
 
 # training_data %>%
@@ -109,7 +114,6 @@ ggsave('atp_serve_loc_on_deuce.jpg',
 #   group_by(server_name, court_side) %>%
 #   summarise(count=n())
 
-
 # ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
 #       Serve locations of right vs. left handed returners      -----    
 # ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
@@ -130,15 +134,16 @@ training_data %>%
   filter(is_track_avail) %>%
   #filter(server_name %in% players_of_interest) %>%
   mutate( x_coord = ifelse( (which_side == 'right'), 
-                            -1 *serveBounceCordinate_x,
-                            serveBounceCordinate_x),
+                            -1 *intended_serve_bounce_x,
+                            intended_serve_bounce_x),
           
           y_coord = ifelse( (which_side == 'right'), 
-                            -1 *serveBounceCordinate_y,
-                            serveBounceCordinate_y)) %>%
+                            -1 *intended_serve_bounce_y,
+                            intended_serve_bounce_y)) %>%
   #filter(court_side =='DeuceCourt') %>%
   filter(serve_num == 2) %>%
   filter(x_coord > -2) %>%
+  filter(x_coord < 11) %>%
   ggplot(aes(x = x_coord, 
              y = y_coord)) +
   draw_half_tennis_court() +
@@ -170,15 +175,16 @@ training_data %>%
   filter(is_track_avail) %>%
   #filter(server_name %in% players_of_interest) %>%
   mutate( x_coord = ifelse( (which_side == 'right'), 
-                            -1 *serveBounceCordinate_x,
-                            serveBounceCordinate_x),
+                            -1 *intended_serve_bounce_x,
+                            intended_serve_bounce_x),
           
           y_coord = ifelse( (which_side == 'right'), 
-                            -1 *serveBounceCordinate_y,
-                            serveBounceCordinate_y)) %>%
+                            -1 *intended_serve_bounce_y,
+                            intended_serve_bounce_y)) %>%
   #filter(court_side =='DeuceCourt') %>%
   filter(serve_num == 2) %>%
   filter(x_coord > -2) %>%
+  filter(x_coord < 11) %>%
   filter(returner_hand == 'left-handed') %>%
   mutate(is_nadal = ifelse(returner_name == 'R.NADAL', TRUE, FALSE)) %>%
   ggplot(aes(x = x_coord, 
@@ -441,4 +447,99 @@ ggplot(data = plot_serve_loc_data_ad,
        title = 'Serve Locations on Advantage Court')
 ggsave('fullcourt_serve_loc_on_ad.jpg',
        width=7.25, height=5,
+       dpi = 400)
+
+
+
+
+# ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
+# -----             Imputed serve directions                    -----    
+# ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
+plot_imputed_data <- training_data %>%
+  filter(is_track_avail) %>%
+  filter(server_name %in% players_of_interest) %>%
+  mutate( 
+          # -- Transform all coordinates to lie on the right part of the court.
+          # Is it appropriate to take the absolute value?
+          # On the right side of court, x_coord is always positive. However, y coord can be
+          # (+) on Deuce or (-) on AdCourt
+          x_coord = ifelse( (which_side == 'right'),
+                            abs(intended_serve_bounce_x),
+                            intended_serve_bounce_x),
+          # # Something funky with some left side serves (all faults) being recorded as highly (-).
+          x_coord = ifelse( ((which_side == 'left') & (x_coord < 0)),
+                            abs(x_coord),
+                            x_coord),
+          y_coord = ifelse( (which_side == 'right'),
+                            -1*(intended_serve_bounce_y),
+                            intended_serve_bounce_y)
+          
+          )
+
+plot_imputed_data %>%
+  filter(error_type == 'Net Error') %>%
+  select(intended_serve_bounce_x, intended_serve_bounce_y) %>%
+  View()
+
+plot_imputed_data %>%
+  filter(error_type == 'Net Error') %>%
+  filter(x_coord < 12)%>%
+  ggplot(aes(x = x_coord, 
+             y = y_coord)) +
+  draw_half_tennis_court() +
+  stat_density_2d(aes(fill = stat(nlevel)), geom = "polygon",
+                  show.legend = F, 
+                  bins = 15, 
+                  alpha = .5)+
+  scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
+  labs(x = "", 
+       y = "",
+       title = 'All Imputed Net Fault Locations')
+
+ggsave('imputed_locations.jpg',
+       width=7.25, height=5,
+       dpi = 400)
+
+summary(atp_rolandgarros_training_data_with_importance$x_coord)
+hist((atp_rolandgarros_training_data_with_importance$x_coord))
+
+
+
+# ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
+# -----   Re-do all plots with intended serve direction         -----    
+# ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
+plot_one_court_data <- training_data %>%
+  filter(is_track_avail) %>%
+  filter(server_name %in% players_of_interest) %>%
+  mutate( x_coord = ifelse( (which_side == 'right'), 
+                            -1 *intended_serve_bounce_x,
+                            intended_serve_bounce_x),
+          
+          y_coord = ifelse( (which_side == 'right'), 
+                            -1 *intended_serve_bounce_y,
+                            intended_serve_bounce_y))
+
+
+plot_one_court_data %>%
+  filter(court_side =='DeuceCourt') %>%
+  #filter(serve_num == 2) %>%
+  #filter(serve_num == 2) %>%
+  filter(x_coord > -2) %>%
+  ggplot(aes(x = x_coord, 
+             y = y_coord)) +
+  draw_half_tennis_court() +
+  stat_density_2d(aes(fill = stat(nlevel)), geom = "polygon",
+                  show.legend = F, 
+                  bins = 15, 
+                  alpha = .5)+
+  scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
+  facet_wrap(~server_name) + 
+  theme(strip.background =element_rect(fill="#f7e3c3"))+
+  labs(x = "", 
+       y = "",
+       title = "Men's Serve Locations on Deuce Court",
+       caption = "Data: Roland Garros 2019-20") 
+
+ggsave('atp_serve_loc_on_deuce.jpg',
+       width=7.25, height=4,
        dpi = 400)
