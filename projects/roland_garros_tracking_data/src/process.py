@@ -29,7 +29,7 @@ def categorise_serve_direction(serveBounceCordinate_y):
     
     Assumes Serve bounce coordinate is given in metres
     Note: (0,0,0) are the coordinates at the middle of the net.
-    Dimension of court: 23.77 m in length (y), and 8.23 m wide (x) -- for single's court
+    Dimension of court: 23.77 m in length (x), and 8.23 m wide (y) -- for single's court
     
     Classifies ball bounce coordinate as: Wide, Body, or T
     '''
@@ -97,6 +97,9 @@ def get_point_level_info(one_point_sequence):
     
     # -- Serve Net Clearance
     z_net_serve = None
+    x_net_serve = None
+    y_net_serve = None
+    
     if is_track_avail:
         
         try:
@@ -104,6 +107,8 @@ def get_point_level_info(one_point_sequence):
             
             if served_ball_loc_net['position'] == 'net':
                 z_net_serve = served_ball_loc_net['z']
+                x_net_serve = served_ball_loc_net['x']
+                y_net_serve = served_ball_loc_net['y']
                 
         except IndexError:
             print('Index Error...')
@@ -210,6 +215,8 @@ def get_point_level_info(one_point_sequence):
         serveBounceCordinate_z = one_point_sequence['serveBounceCordinate']['z'],
         serve_dir = serve_dir,
         z_net_serve = z_net_serve,
+        x_net_serve = x_net_serve,
+        y_net_serve = y_net_serve,
         z_peak_serve = z_peak_serve,
         
         # (initial) Ball coordinate on last shot 
@@ -316,6 +323,9 @@ def get_match_point_level_info(raw_json_file):
     except ValueError:
         match_point_df = pd.DataFrame([])
     
+    
+    # -- Remove Duplicate rows
+    match_point_df.drop_duplicates(inplace=True)
     # -- Reset row indices
     match_point_df.reset_index(drop=True, inplace=True)
     
