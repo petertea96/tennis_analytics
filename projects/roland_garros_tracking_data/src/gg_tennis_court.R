@@ -1,7 +1,6 @@
 ### -- Plotting the tennis court functions
 # For aesthetic reasons, it's nice to visualize tennis courts with shot heat maps
 
-
 library(ggplot2)
 
 # -- Draw a half tennis court
@@ -143,10 +142,10 @@ draw_half_tennis_court_with_annotation <- function(){
     theme_classic(),
     theme(panel.background = element_rect(fill="#ad5049"), 
           plot.title = element_text(hjust = 0.5, face = "bold"),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank(),
-          axis.text.y=element_blank(),
-          axis.ticks.y=element_blank(),
+          #axis.text.x=element_blank(),
+          #axis.ticks.x=element_blank(),
+          #axis.text.y=element_blank(),
+          #axis.ticks.y=element_blank(),
           axis.line=element_blank(),
           strip.text = element_text(colour = 'black',face = 'bold'))
     
@@ -156,11 +155,11 @@ draw_half_tennis_court_with_annotation <- function(){
 
 # ggplot() +
 #   draw_half_tennis_court_with_annotation()
-# 
+# # 
 # ggsave('tennis_court_anatomy.jpg',
-#        width=7.25, height=5,
-#        dpi = 400)
-
+#        width=6, height=4,
+#        dpi = 250)
+# 
 
 # -- Draw a full tennis court
 draw_full_tennis_court <- function(){
