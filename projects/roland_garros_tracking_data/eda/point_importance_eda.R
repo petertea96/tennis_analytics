@@ -2,11 +2,11 @@
 
 library(dplyr)
 library(ggplot2)
-
+setwd("/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data")
 source(file = "/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data/src/ggplot_theme.R")
 source('src/gg_tennis_court.R')
 
-setwd("/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data")
+
 atp_pbp_df <- read.csv('./collect_data/data/atp_processed_roland_garros_tracking_data.csv',
                        na.strings=c("","NA"))
 
@@ -148,6 +148,12 @@ names(cat_point_importance.labs) <- c("High", "Low")
 
 importance_df %>%
   filter(server_name == 'R.FEDERER') %>%
+  group_by(cat_point_importance) %>%
+  summarise(n())
+  
+
+importance_df %>%
+  filter(server_name == 'R.FEDERER') %>%
   distinct() %>%
   #filter(court_side == 'AdCourt') %>%
   filter(x_coord > -2) %>%
@@ -155,27 +161,20 @@ importance_df %>%
   ggplot(aes(x = x_coord, 
              y = y_coord)) +
   draw_half_tennis_court() +
-  stat_density_2d(aes(fill = stat(nlevel)), geom = "polygon",
-                  show.legend = F, 
-                  bins = 15, 
-                  alpha = .5)+
-  scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
+  lazy_add_heatmap() +
   facet_grid(court_side ~ cat_point_importance,
              labeller = labeller(court_side = courtside.labs,
                                  cat_point_importance = cat_point_importance.labs)) + 
-  #theme_classic() +
-  #theme_bw() + 
-  theme(strip.background =element_rect(fill="#f7e3c3"))+
-  theme(strip.text = element_text(colour = 'black',face = 'bold'),
-        plot.title = element_text(hjust = 0.5)) + 
+
   labs(x = "", 
        y = "",
        title = "Federer Adjusting Serve Direction on Important Points?",
-       caption ='Data: Roland Garros 2019-20')
+       caption ='Data: Roland Garros 2019-20'
+       )
 
-ggsave('fed_adjusting_serve_imp.jpg',
-       width=7, height=5,
-       dpi = 400)
+ggsave('./eda/plots/fed_adjusting_serve_imp.jpg',
+       width=6, height=4,
+       dpi = 250)
 
 importance_df %>%
   filter(server_name == 'R.FEDERER') %>%
@@ -196,28 +195,73 @@ importance_df %>%
   ggplot(aes(x = x_coord, 
              y = y_coord)) +
   draw_half_tennis_court() +
-  stat_density_2d(aes(fill = stat(nlevel)), geom = "polygon",
-                  show.legend = F, 
-                  bins = 15, 
-                  alpha = .5)+
-  scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
+  lazy_add_heatmap() +
   facet_grid(court_side ~ cat_point_importance,
              labeller = labeller(court_side = courtside.labs,
                                  cat_point_importance = cat_point_importance.labs)) + 
-  #theme_classic() +
-  #theme_bw() + 
-  theme(strip.background =element_rect(fill="#f7e3c3"))+
-  theme(strip.text = element_text(colour = 'black',face = 'bold'),
-        plot.title = element_text(hjust = 0.5)) + 
   labs(x = "", 
        y = "",
-       title = "Djokovic's Consistent Serve Patterns on Important Points",
-       caption ='Data: Roland Garros 2019-20')
+       title = "Djokovic's Consistent Serve Direction on Important Points",
+       caption ='Data: Roland Garros 2019-20'
+       )
 
-ggsave('djokovic_adjusting_serve_imp.jpg',
-       width=7, height=5,
-       dpi = 400)
+ggsave('./eda/plots/djokovic_adjusting_serve_imp.jpg',
+       width=6, height=4,
+       dpi = 250)
 
 
 
+# -- Boxplot of point importance
+plot_fed_djoko <- 
+importance_df %>%
+  filter(server_name %in% c('R.FEDERER', 'N.DJOKOVIC')) 
+
+plot_fed_djoko$server_name <- factor(plot_fed_djoko$server_name)
+
+
+plot_fed_djoko %>%
+  filter(server_name == 'R.FEDERER') %>%
+  select(point_importance) %>%
+  .$point_importance %>%
+  quantile(0.8)
+
+plot_fed_djoko %>%
+  filter(server_name == 'N.DJOKOVIC') %>%
+  select(point_importance) %>%
+  .$point_importance %>%
+  quantile(0.8)
+
+
+plot_fed_djoko %>%
+  ggplot(aes(x = server_name, y = point_importance, fill = server_name)) +
+  # geom_jitter(color = 'blue',
+  #             fill = 'black',
+  #             alpha = 0.15) +
+  geom_boxplot(position = position_dodge(0.9),
+               alpha = 0.75,
+               color = '#6c7a86',
+               #fill = 'blue'
+               ) +
+  geom_hline(yintercept = 0.05610644, linetype = 'dashed', color = 'coral') +
+  geom_hline(yintercept = 0.05341246, linetype = 'dashed', color = '#00BFC4') +
+  peter_theme(family_font = 'Tahoma') + 
+  annotate("text", x = 2.35, y = 0.07, label = "80th Percentile",
+           colour = 'black', fontface =1, size = 3.5) +
+  annotate("rect", xmin = 2.1, 
+           xmax = 2.6, 
+           ymin = 0.055,
+           ymax = 0.085,
+           alpha = .1) + 
+  theme(strip.background =element_rect(fill="#f7e3c3"),
+        strip.text.x = element_text(size = 10),
+        legend.position = "none") +
+  labs(y = 'Point Importance',
+       x = ''
+       #caption = 'Data: Roland Garros 2019-20'
+       )
+
+
+ggsave('./eda/plots/point_imp_boxplot.jpg',
+       width=5.5, height=3.5,
+       dpi = 250)
 

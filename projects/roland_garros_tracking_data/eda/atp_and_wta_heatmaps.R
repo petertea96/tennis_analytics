@@ -44,19 +44,14 @@ plot_one_court_data %>%
   ggplot(aes(x = x_coord, 
              y = y_coord)) +
   draw_half_tennis_court() +
-  stat_density_2d(aes(fill = stat(nlevel)), geom = "polygon",
-                  show.legend = F, 
-                  bins = 15, 
-                  alpha = .5)+
-  scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
+  lazy_add_heatmap() +
   facet_wrap(~server_name) + 
-  theme(strip.background =element_rect(fill="#f7e3c3"))+
   labs(x = "", 
        y = "",
-       title = "Serve Locations on Deuce Court",
+       title = "All 1st & 2nd Serve Locations on Deuce Court",
        caption = "Data: Roland Garros 2019-20") 
 
-ggsave('atp_wta_serve_loc_on_deuce.jpg',
+ggsave('./eda/plots/atp_wta_serve_loc_on_deuce.jpg',
        width=6, height=3.5,
        dpi = 300)
 

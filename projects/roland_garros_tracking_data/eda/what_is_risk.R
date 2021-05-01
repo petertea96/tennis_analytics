@@ -11,8 +11,9 @@ library(ggplot2)
 library(ggridges)
 
 setwd("/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data/")
+source(file = "/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data/src/ggplot_theme.R")
 
-training_data <- read.csv('./atp_processed_roland_garros_tracking_data.csv',
+training_data <- read.csv('./collect_data/data/atp_processed_roland_garros_tracking_data.csv',
                           stringsAsFactors = FALSE)
 
 
@@ -28,8 +29,8 @@ table(training_data$server_name)
 # J.TSONGA
 
 players_of_interest <- c('R.NADAL', 'R.FEDERER', 'N.DJOKOVIC',
-                         'D.THIEM', 'S.TSITSIPAS', 'A.ZVEREV',
-                         'B.PAIRE', 'J.TSONGA', 'D.SHAPOVALOV'
+                         'D.THIEM', 'S.TSITSIPAS', 'A.ZVEREV'
+                         #'B.PAIRE', 'J.TSONGA', 'D.SHAPOVALOV'
                          )
 
 
@@ -38,7 +39,7 @@ players_of_interest <- c('R.NADAL', 'R.FEDERER', 'N.DJOKOVIC',
 # ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
 
 plot_speed_data <- training_data %>%
-  filter(serve_speed_kph > 0) %>%
+  #filter(serve_speed_kph > 0) %>%
   filter(serve_speed_kph > 100) %>%
   #filter(serve_num == 1) %>% 
   filter(server_name %in% players_of_interest)
@@ -56,13 +57,37 @@ ggplot(data = plot_speed_data,
   geom_density_ridges(aes(fill = as.factor(serve_num)),
                       alpha = 0.5) +
   labs(x = "Speed (KM/H)", 
-       y = "Server",
+       y = "",
        title = 'Serve Speed Densities',
-       fill = 'Serve Number')
+       fill = 'Serve Number',
+       caption = 'Roland Garros\n2019-20') +
+  peter_theme(family_font = 'Tahoma')
 
 ggsave('serve_speeds.jpg',
-       width=7.25, height=5,
-       dpi = 400)
+       width=6, height=4,
+       dpi = 300)
+
+
+ggplot(data = plot_speed_data %>% filter(server_name == 'N.DJOKOVIC'),
+       aes(x = serve_speed_kph)) + 
+  geom_histogram(aes(fill = as.factor(serve_num)),
+                      alpha = 0.5) +
+  labs(x = "Speed (KM/H)", 
+       y = "",
+       title = 'Serve Speed Densities',
+       fill = 'Serve Number',
+       caption = 'Roland Garros\n2019-20') +
+  peter_theme(family_font = 'Tahoma')
+ggplot(data = plot_speed_data %>% filter(server_name == 'D.THIEM'),
+       aes(x = serve_speed_kph)) + 
+  geom_histogram(aes(fill = as.factor(serve_num)),
+                 alpha = 0.5) +
+  labs(x = "Speed (KM/H)", 
+       y = "",
+       title = 'Serve Speed Densities',
+       fill = 'Serve Number',
+       caption = 'Roland Garros\n2019-20') +
+  peter_theme(family_font = 'Tahoma')
 
 
 # -- Plot against Fault indicators

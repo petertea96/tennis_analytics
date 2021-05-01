@@ -69,25 +69,19 @@ training_data %>%
   ggplot(aes(x = x_coord, 
              y = y_coord)) +
   draw_half_tennis_court() +
-  stat_density_2d(aes(fill = stat(nlevel)), geom = "polygon",
-                  show.legend = F, 
-                  bins = 15, 
-                  alpha = .5)+
-  scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
-  #facet_wrap(~ court_side + returner_hand ) + 
+  lazy_add_heatmap() +
   facet_grid(court_side ~ returner_hand,
              labeller = labeller(court_side = courtside.labs,
                                  returner_hand = handedness.labs)) + 
-  theme(strip.background =element_rect(fill="#f7e3c3"))+
   labs(x = "", 
        y = "",
        title = "WTA 2nd Serve Locations",
        caption = 'Data: Roland Garros 2019-20') 
 
 
-ggsave('wta_serve_loc_against_returner_handedness.jpg',
+ggsave('./eda/plots/wta_serve_loc_against_returner_handedness.jpg',
        width=7, height=5,
-       dpi = 400)
+       dpi = 240)
 
 
 
@@ -113,20 +107,16 @@ plot_one_court_data %>%
   ggplot(aes(x = x_coord, 
              y = y_coord)) +
   draw_half_tennis_court() +
-  stat_density_2d(aes(fill = stat(nlevel)), geom = "polygon",
-                  show.legend = F, 
-                  bins = 15, 
-                  alpha = .5)+
-  scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
+  lazy_add_heatmap()+
   facet_wrap(~server_name) + 
-  theme(strip.background =element_rect(fill="#f7e3c3"))+
   labs(x = "", 
        y = "",
-       title = 'Roland Garros 2019-20 Serve Locations on Advantage Court')
+       title = "Women's 1st & 2nd Serve Locations on Advantage Court",
+       caption = 'Data: Roland Garros 2019-20')
 
-ggsave('wta_serve_loc_on_ad.jpg',
+ggsave('./eda/plots/wta_serve_loc_on_ad.jpg',
        width=7.25, height=4,
-       dpi = 400)
+       dpi = 240)
 
 plot_one_court_data %>%
   filter(court_side =='DeuceCourt') %>%
@@ -135,20 +125,16 @@ plot_one_court_data %>%
   ggplot(aes(x = x_coord, 
              y = y_coord)) +
   draw_half_tennis_court() +
-  stat_density_2d(aes(fill = stat(nlevel)), geom = "polygon",
-                  show.legend = F, 
-                  bins = 15, 
-                  alpha = .4)+
-  scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
+  lazy_add_heatmap() +
   facet_wrap(~server_name) + 
-  theme(strip.background =element_rect(fill="#f7e3c3")) +
   labs(x = "", 
        y = "",
-       title = 'Roland Garros 2019-20 Serve Locations on Deuce Court') 
+       title = "Women's 1st & 2nd Serve Locations on Deuce Court",
+       caption = 'Data: Roland Garros 2019-20') 
 
-ggsave('wta_serve_loc_on_deuce.jpg',
+ggsave('./eda/plots/wta_serve_loc_on_deuce.jpg',
        width=7.25, height=4,
-       dpi = 400)
+       dpi = 240)
 
 
 

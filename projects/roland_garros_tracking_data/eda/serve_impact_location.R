@@ -18,6 +18,7 @@ source(file = "/Users/petertea/tennis_analytics/projects/roland_garros_tracking_
 atp_plot_serve_impact_df <-
 atp_pbp_df %>%
   filter(is_track_avail) %>%
+  distinct() %>%
   #filter(server_name %in% players_of_interest) %>%
   #filter(server_hand == 'right-handed') %>%
   select(court_side, serve_num, server_hand,
@@ -98,14 +99,15 @@ atp_plot_serve_impact_df %>%
   peter_theme(family_font = 'Tahoma') + 
   theme(strip.background =element_rect(fill="#f7e3c3"),
         strip.text.x = element_text(size = 10, face = 'bold')) +
-  labs(x = 'Lateral Ball Displacement at\nServe Impact (M)', y = 'Density',
+  labs(x = 'Lateral Ball Position at\nServe Impact (M)', y = 'Density',
        fill = '',
-       title = 'ATP Right-Hander Serve Lateral\nDisplacement on Deuce Court',
-       caption = 'Data: Roland Garros\n2019-20')
+       title = "Right-Handed Men's Impact\n Position on Deuce Court"
+       #caption = 'Data: Roland Garros\n2019-20'
+       )
 
 ggsave('lateral_displacement_serve_deuce_atp.jpg',
-       width=7, height=5,
-       dpi = 400)
+       width=5, height=3.5,
+       dpi = 280)
 
 
 

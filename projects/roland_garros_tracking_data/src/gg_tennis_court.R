@@ -203,5 +203,24 @@ draw_full_tennis_court <- function(){
  #   draw_full_tennis_court()
 
 
+lazy_add_heatmap <- function(){
+  list(
+    stat_density_2d(aes(fill = stat(nlevel)), geom = "polygon",
+                    show.legend = TRUE, 
+                    alpha = .8),
+    scale_fill_gradientn(colours = c('white','pink1', 'red4')),
+    theme(strip.background =element_rect(fill="#f7e3c3"),
+          strip.text = element_text(colour = 'black',face = 'bold'),
+          plot.title = element_text(hjust = 0.5),
+          legend.position = 'right',
+          legend.direction = 'vertical',
+          legend.margin=margin(1,1,1,1),
+          plot.caption = element_text(vjust = 6, face = "italic")),
+    guides( fill = guide_colourbar( barheight = unit( 2 , "in" ) ))
+  
+    
+  )
+  
+}
 
 

@@ -15,12 +15,11 @@ source('src/gg_tennis_court.R')
 
 # *** NOTE ***
 # --> ServeBounce are actual bounce locations
-# --> intended_serve_bounce are imputed serve directions on net faults...heatmaps will
-#     look wonky!
+# --> intended_serve_bounce are imputed serve directions on net faults
 
 training_data <- read.csv('./collect_data/data/atp_processed_roland_garros_tracking_data.csv',
                           stringsAsFactors = FALSE)
-
+# training_data %>% filter(is_track_avail) %>% distinct() %>% nrow()
 # training_data %>%
 #   filter(is_track_avail) %>%
 #   filter(returner_hand=='left-handed') %>%
@@ -31,7 +30,7 @@ players_of_interest <- c('R.NADAL', 'R.FEDERER', 'N.DJOKOVIC',
                          'D.THIEM', 'S.TSITSIPAS', 'A.ZVEREV',
                          'B.PAIRE', 'J.TSONGA', 'D.SHAPOVALOV')
 
-players_of_interest <- c('R.NADAL', 'R.FEDERER', 'N.DJOKOVIC',
+players_of_interest <- c('R.NADAL',  'N.DJOKOVIC','R.FEDERER',
                          'D.THIEM', 'S.TSITSIPAS', 'A.ZVEREV')
 
 
@@ -56,33 +55,50 @@ summary(plot_one_court_data$x_coord)
 #   select(serveBounceCordinate_x, serveBounceCordinate_y, court_side, which_side, x_coord, y_coord) %>%
 #   View()
 
+# -- Quick check how many serve obersations there are for each player
+plot_one_court_data %>%
+  group_by(server_name) %>%
+  summarise(n())
+
+
+# -- Change order of players
+plot_one_court_data$server_name <- factor(plot_one_court_data$server_name,
+                                          levels = players_of_interest)
 
 plot_one_court_data %>%
   filter(court_side =='AdCourt') %>%
   #filter(serve_num == 2) %>%
-  #filter(returner_hand == 'left-handed') %>%
   filter(x_coord > -2) %>%
   ggplot(aes(x = x_coord, 
              y = y_coord)) +
   draw_half_tennis_court() +
   stat_density_2d(aes(fill = stat(nlevel)), geom = "polygon",
-                  show.legend = F, 
-                  bins = 15, 
-                  alpha = .5)+
-  scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
-  facet_wrap(~server_name) + 
-  #theme_classic() +
-  #theme_bw() + 
+                  show.legend = TRUE, 
+                  #bins = 15, 
+                  alpha = .8
+                  )+
+  scale_fill_gradientn(colours = c('white','pink1', 'red4')) +
+  #, trans = 'log10'
+  facet_wrap(~server_name, nrow = 2) + 
   theme(strip.background =element_rect(fill="#f7e3c3"))+
   theme(strip.text = element_text(colour = 'black',face = 'bold'),
-        plot.title = element_text(hjust = 0.5))+
+        plot.title = element_text(hjust = 0.5),
+        legend.position = 'right',
+        legend.direction = 'vertical',
+        legend.margin=margin(1,1,1,1),
+        plot.caption = element_text(vjust = 6, face = "italic")
+        )+
+  guides( fill = guide_colourbar( barheight = unit( 2 , "in" ) ))+
   labs(x = "", 
        y = "",
-       title = "Men's Roland Garros 2019-20 Serve Locations\n on Advantage Court")
+       fill = 'nLevel',
+       title = "Men's 1st and 2nd Serve Locations on Advantage Court",
+       caption = 'Data: 2019 & 2020 Roland Garros'
+       )
 
-ggsave('atp_serve_loc_on_ad.jpg',
-       width=7.25, height=4,
-       dpi = 400)
+ggsave('./eda/plots/atp_serve_loc_on_ad.jpg',
+       width=6, height=3.5,
+       dpi = 240)
 
 plot_one_court_data %>%
   filter(court_side =='DeuceCourt') %>%
@@ -92,43 +108,67 @@ plot_one_court_data %>%
              y = y_coord)) +
   draw_half_tennis_court() +
   stat_density_2d(aes(fill = stat(nlevel)), geom = "polygon",
-                  show.legend = F, 
-                  bins = 15, 
-                  alpha = .5)+
-  scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
+                  show.legend = TRUE, 
+                  #bins = 15, 
+                  alpha = .8)+
+  scale_fill_gradientn(colours = c('white','pink1', 'red4')) +
+  #, trans = 'log10'
   facet_wrap(~server_name) + 
-  theme(strip.background =element_rect(fill="#f7e3c3"))+
+  theme(strip.background =element_rect(fill="#f7e3c3"),
+        strip.text = element_text(colour = 'black',face = 'bold'),
+        plot.title = element_text(hjust = 0.5),
+        legend.position = 'right',
+        legend.direction = 'vertical',
+        legend.margin=margin(1,1,1,1),
+        plot.caption = element_text(vjust = 6, face = "italic")
+        )+
+  guides( fill = guide_colourbar( barheight = unit( 2 , "in" ) ))+
   labs(x = "", 
        y = "",
-       title = "Men's Roland Garros 2019-20 Serve Locations\n on Deuce Court") 
+       fill = 'nLevel',
+       title = "Men's 1st & 2nd Serve Locations on Deuce Court",
+       caption = 'Data: 2019 & 2020 Roland Garros') 
   
-ggsave('atp_serve_loc_on_deuce.jpg',
-       width=7.25, height=4,
-       dpi = 400)
+ggsave('./eda/plots/atp_serve_loc_on_deuce.jpg',
+       width=6, height=3.5,
+       dpi = 240)
 
-# plot_one_court_data %>%
-#   filter(server_name=='R.FEDERER') %>%
-#   View()
+# -- Why does it seem like Sasha doesn;t fault on Deuce?
+training_data %>%
+  filter(server_name == 'A.ZVEREV') %>%
+  group_by(court_side) %>%
+  summarise(sum(is_fault))
 
-# plot_one_court_data %>%
-#   group_by(server_name, court_side) %>%
-#   summarise(count=n())
+plot_one_court_data %>%
+  filter(court_side =='DeuceCourt') %>%
+  filter(server_name == 'A.ZVEREV') %>%
+  #filter(serve_num == 2) %>%
+  filter(x_coord > -2) %>%
+  ggplot(aes(x = x_coord, 
+             y = y_coord)) +
+  draw_half_tennis_court() +
+  geom_point(alpha = 0.1, colour = 'red') 
+
+
+# Interpreting legend -----
+# https://stackoverflow.com/questions/53172200/stat-density2d-what-does-the-legend-mean?noredirect=1&lq=1
+# Basically, the algorithm forms a bunch of binning grids and colours each grid
+# corresponding to the number of points falling within the grid.
+# nlevel: https://ggplot2.tidyverse.org/reference/geom_contour.htm
 
 # ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
 #       Serve locations of right vs. left handed returners      -----    
 # ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
-
-# training_data %>%
-#   filter(is_track_avail) %>%
-#   filter(serve_num == 2) %>%
-#   group_by(returner_hand) %>%
-#   summarise(count = n())
 
 courtside.labs <- c("Advantage Court", "Deuce Court")
 names(courtside.labs) <- c("AdCourt", "DeuceCourt")
 
 handedness.labs <- c("vs. Left-Handed Returners", "vs. Right-Handed Returners")
 names(handedness.labs) <- c("left-handed", "right-handed")
+
+
+# training_data$court_side <- factor(training_data$court_side,
+#                                    levels = c('DeuceCourt', 'AdCourt'))
 
 training_data %>%
   filter(is_track_avail) %>%
@@ -148,30 +188,39 @@ training_data %>%
              y = y_coord)) +
   draw_half_tennis_court() +
   stat_density_2d(aes(fill = stat(nlevel)), geom = "polygon",
-                  show.legend = F, 
-                  bins = 15, 
-                  alpha = .5)+
-  scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
+                  show.legend = TRUE, 
+                  #bins = 15, 
+                  alpha = .8)+
+  scale_fill_gradientn(colours = c('white','pink1', 'red4')) +
   #facet_wrap(~ court_side + returner_hand ) + 
   facet_grid(court_side ~ returner_hand,
              labeller = labeller(court_side = courtside.labs,
                                  returner_hand = handedness.labs)) + 
-  theme(strip.background =element_rect(fill="#f7e3c3"))+
+  theme(strip.background =element_rect(fill="#f7e3c3"),
+        strip.text = element_text(colour = 'black',face = 'bold'),
+        plot.title = element_text(hjust = 0.5),
+        legend.position = 'right',
+        legend.direction = 'vertical',
+        legend.margin=margin(1,1,1,1),
+        plot.caption = element_text(vjust = 6, face = "italic"))+
+  guides( fill = guide_colourbar( barheight = unit( 2 , "in" ) ))+
   labs(x = "", 
        y = "",
-       title = "ATP 2nd Serve Locations",
-       caption = 'Data: Roland Garros 2019-20') 
+       fill = 'nLevel',
+       title = "Men's 2nd Serve Locations",
+       caption = 'Data: Roland Garros 2019-20'
+       ) 
 
-ggsave('atp_serve_loc_against_returner_handedness.jpg',
-       width=7, height=5,
-       dpi = 400)
+ggsave('./eda/plots/atp_serve_loc_against_returner_handedness.jpg',
+       width=5, height=4,
+       dpi = 280)
 
 
 # -- Serve location against Nadal
 nadal.labs <- c("vs. Nadal", "vs. Every Other Lefty")
-names(nadal.labs) <- c("TRUE", "FALSE")
+names(nadal.labs) <- c("FALSE", "TRUE")
 
-training_data %>%
+nadal_plot_comp_data <- training_data %>%
   filter(is_track_avail) %>%
   #filter(server_name %in% players_of_interest) %>%
   mutate( x_coord = ifelse( (which_side == 'right'), 
@@ -186,28 +235,40 @@ training_data %>%
   filter(x_coord > -2) %>%
   filter(x_coord < 11) %>%
   filter(returner_hand == 'left-handed') %>%
-  mutate(is_nadal = ifelse(returner_name == 'R.NADAL', TRUE, FALSE)) %>%
+  mutate(not_nadal = ifelse(!(returner_name == 'R.NADAL'), TRUE, FALSE)) 
+
+
+
+nadal_plot_comp_data %>%
   ggplot(aes(x = x_coord, 
              y = y_coord)) +
   draw_half_tennis_court() +
   stat_density_2d(aes(fill = stat(nlevel)), geom = "polygon",
-                  show.legend = F, 
-                  bins = 15, 
-                  alpha = .5)+
-  scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
+                  show.legend = TRUE, 
+                  #bins = 15, 
+                  alpha = .8)+
+  scale_fill_gradientn(colours = c('white','pink1', 'red4')) +
   #facet_wrap(~ court_side + returner_hand ) + 
-  facet_grid(court_side ~ is_nadal,
+  facet_grid(court_side ~ not_nadal,
              labeller = labeller(court_side = courtside.labs,
-                                 is_nadal = nadal.labs)) + 
-  theme(strip.background =element_rect(fill="#f7e3c3"))+
+                                 not_nadal = nadal.labs)) + 
+  theme(strip.background =element_rect(fill="#f7e3c3"),
+        strip.text = element_text(colour = 'black',face = 'bold'),
+        plot.title = element_text(hjust = 0.5),
+        legend.position = 'right',
+        legend.direction = 'vertical',
+        legend.margin=margin(1,1,1,1),
+        plot.caption = element_text(vjust = 6, face = "italic"))+
+  guides( fill = guide_colourbar( barheight = unit( 2 , "in" ) )) +
   labs(x = "", 
        y = "",
+       fill = 'nLevel',
        title = "ATP 2nd Serve Locations against Lefties",
        caption = 'Data: Roland Garros 2019-20') 
 
-ggsave('atp_serve_loc_against_returner_handedness_not_nadal.jpg',
+ggsave('./eda/plots/atp_serve_loc_against_returner_handedness_not_nadal.jpg',
        width=7, height=5,
-       dpi = 400)
+       dpi = 240)
 
 training_data %>%
   filter(is_track_avail) %>%
@@ -339,59 +400,6 @@ training_data %>%
   labs(x = "", 
        y = "",
        title = "ATP Serve Locations") 
-
-
-
-# ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
-# -----           Plots with Point Importance                    -----    
-# ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
-
-hist(training_data$point_importance)
-
-table(ifelse(training_data$point_importance > 0.1, 1,0))
-
-training_data %>%
-  filter(is_track_avail) %>%
-  #filter(server_name %in% players_of_interest) %>%
-  mutate( x_coord = ifelse( (which_side == 'right'), 
-                            -1 *serveBounceCordinate_x,
-                            serveBounceCordinate_x),
-          y_coord = ifelse( (which_side == 'right'), 
-                            -1 *serveBounceCordinate_y,
-                            serveBounceCordinate_y)) %>%
-  filter(x_coord > -2) %>%
-  filter(server_name %in% players_of_interest) %>%
-  mutate(point_i = ifelse(point_importance > 0.1,
-                     'Important',
-                     'Not Important')) %>%
-  ggplot(aes(x = x_coord, 
-             y = y_coord)) +
-  draw_half_tennis_court() +
-  stat_density_2d(aes(fill = stat(nlevel)), geom = "polygon",
-                  show.legend = F, 
-                  bins = 15, 
-                  alpha = .5)+
-  scale_fill_gradientn(colours = c('khaki1','pink1', 'red4'), trans = 'log10') +
-  facet_grid(point_i~server_name) + 
-  theme(strip.background =element_rect(fill="#f7e3c3"))+
-  labs(x = "", 
-       y = "",
-       title = "ATP Serve Locations") 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
 # -----                  Plots on Full Court                    -----    
