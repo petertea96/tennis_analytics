@@ -48,7 +48,7 @@ plot_one_court_data %>%
   facet_wrap(~server_name) + 
   labs(x = "", 
        y = "",
-       title = "All 1st & 2nd Serve Locations on Deuce Court",
+       title = "All Intended 1st & 2nd Serve Locations on Deuce Court",
        caption = "Data: Roland Garros 2019-20") 
 
 ggsave('./eda/plots/atp_wta_serve_loc_on_deuce.jpg',

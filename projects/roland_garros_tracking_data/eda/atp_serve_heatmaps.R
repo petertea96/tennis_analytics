@@ -170,6 +170,12 @@ names(handedness.labs) <- c("left-handed", "right-handed")
 # training_data$court_side <- factor(training_data$court_side,
 #                                    levels = c('DeuceCourt', 'AdCourt'))
 
+training_data$court_side <- factor(training_data$court_side,
+                                   levels = c('DeuceCourt', 'AdCourt'))
+
+courtside.labs <- c("Ad. Court", "Deuce Court")
+names(courtside.labs) <- c("AdCourt", "DeuceCourt")
+
 training_data %>%
   filter(is_track_avail) %>%
   #filter(server_name %in% players_of_interest) %>%
@@ -207,7 +213,7 @@ training_data %>%
   labs(x = "", 
        y = "",
        fill = 'nLevel',
-       title = "Men's 2nd Serve Locations",
+       #title = "Men's 2nd Serve Locations",
        caption = 'Data: Roland Garros 2019-20'
        ) 
 

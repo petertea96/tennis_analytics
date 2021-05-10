@@ -168,7 +168,8 @@ importance_df %>%
 
   labs(x = "", 
        y = "",
-       title = "Federer Adjusting Serve Direction on Important Points?",
+       #title = "Federer Adjusting Serve Direction on Important Points?",
+       #title = "Federer's Serve Direction on Varying Important Points",
        caption ='Data: Roland Garros 2019-20'
        )
 
@@ -201,7 +202,8 @@ importance_df %>%
                                  cat_point_importance = cat_point_importance.labs)) + 
   labs(x = "", 
        y = "",
-       title = "Djokovic's Consistent Serve Direction on Important Points",
+       #title = "Djokovic's Consistent Serve Direction on Important Points",
+       #title = "Djokovic's Serve Direction on Varying Important Points",
        caption ='Data: Roland Garros 2019-20'
        )
 
