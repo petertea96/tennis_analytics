@@ -70,6 +70,41 @@ atp_plot_serve_impact_df %>%
   )
 
 
+# -- boxplot
+serve_num.labs <- c("First Serve", "Second Serve")
+names(serve_num.labs) <- c(1, 2)
+atp_plot_serve_impact_df$intended_serve_dir <- factor(atp_plot_serve_impact_df$intended_serve_dir,
+                                                      levels = c('T', 'Body', 'Wide'))
+atp_plot_serve_impact_df %>%
+  filter(server_hand == 'right-handed') %>%
+  filter(abs(dist_inside_baseline) < 5) %>%
+  #filter(court_side == 'DeuceCourt') %>%
+  filter(!is.na(intended_serve_dir)) %>%
+  mutate(serve_num = as.factor(serve_num)) %>%
+  ggplot( aes(y = dist_inside_baseline, 
+              x = intended_serve_dir,
+              fill=intended_serve_dir)) +
+  geom_boxplot(alpha = 0.5) +
+  # facet_grid(~ serve_num,
+  #            labeller = labeller(serve_num = serve_num.labs)) + 
+  facet_grid(~ court_side) + 
+  peter_theme(family_font = 'Tahoma') + 
+  theme(strip.background =element_rect(fill="#f7e3c3"),
+        strip.text.x = element_text(size = 10, face = 'bold'),
+        legend.position = "none") #+
+  # labs(x = 'Lateral Ball Position at\nServe Impact', y = 'Lateral Position\n(Metres)',
+  #      fill = '',
+  #      title = "Right-Handed Men's Impact\n Position on Deuce Court"
+  #      #caption = 'Data: Roland Garros\n2019-20'
+  # )
+
+atp_plot_serve_impact_df %>%
+  filter(server_hand == 'right-handed') %>%
+  filter(abs(dist_inside_baseline) < 5) %>%
+  ggplot( aes(x = dist_inside_baseline, fill=as.factor(serve_num))) +
+  geom_boxplot( aes(y = ..density.., fill=as.factor(serve_num)),
+                alpha = 0.3)
+
 # ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
 # -- How much lateral movement is there on ATP serves ? -----
 # ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
@@ -82,9 +117,10 @@ atp_plot_serve_impact_df %>%
   View()
 
 
-serve_num.labs <- c("1st Serve", "2nd Serve")
+serve_num.labs <- c("First Serve", "Second Serve")
 names(serve_num.labs) <- c(1, 2)
 
+# -- Histograms
 atp_plot_serve_impact_df %>%
   filter(server_hand == 'right-handed') %>%
   filter(court_side == 'DeuceCourt') %>%
@@ -99,11 +135,38 @@ atp_plot_serve_impact_df %>%
   peter_theme(family_font = 'Tahoma') + 
   theme(strip.background =element_rect(fill="#f7e3c3"),
         strip.text.x = element_text(size = 10, face = 'bold')) +
-  labs(x = 'Lateral Ball Position at\nServe Impact (M)', y = 'Density',
+  labs(x = 'Lateral Ball Position at\nServe Impact (Metres)', y = 'Density',
        fill = '',
        title = "Right-Handed Men's Impact\n Position on Deuce Court"
        #caption = 'Data: Roland Garros\n2019-20'
        )
+
+
+
+# -- Boxplots
+atp_plot_serve_impact_df$intended_serve_dir <- factor(atp_plot_serve_impact_df$intended_serve_dir,
+                                                      levels = c('T', 'Body', 'Wide'))
+atp_plot_serve_impact_df %>%
+  filter(server_hand == 'right-handed') %>%
+  filter(court_side == 'DeuceCourt') %>%
+  filter(!is.na(intended_serve_dir)) %>%
+  filter(serve_impact_from_center < 3) %>%
+  mutate(serve_num = as.factor(serve_num)) %>%
+  ggplot( aes(y = serve_impact_from_center, 
+              x = intended_serve_dir,
+              fill=intended_serve_dir)) +
+  geom_boxplot(alpha = 0.5) +
+  facet_grid(~ serve_num,
+             labeller = labeller(serve_num = serve_num.labs)) + 
+  peter_theme(family_font = 'Tahoma') + 
+  theme(strip.background =element_rect(fill="#f7e3c3"),
+        strip.text.x = element_text(size = 10, face = 'bold'),
+        legend.position = "none") +
+  labs(x = 'Lateral Ball Position at\nServe Impact', y = 'Lateral Position\n(Metres)',
+       fill = '',
+       title = "Right-Handed Men's Impact\n Position on Deuce Court"
+       #caption = 'Data: Roland Garros\n2019-20'
+  )
 
 ggsave('lateral_displacement_serve_deuce_atp.jpg',
        width=5, height=3.5,

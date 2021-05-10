@@ -117,6 +117,23 @@ atp_stan_datalist4 <- list(
   x13 = atp_training_data$interaction_ss_bh_T,
   K = 3
 )
+
+atp_stan_datalist6 <- list(
+  N = nrow(atp_training_data),
+  y = atp_training_data$y,
+  x1 = atp_training_data$is_second_serve,
+  x2 = atp_training_data$serve_impact_from_center,
+  x3 = atp_training_data$distance_inside_serve,
+  x4 = atp_training_data$prev_intended_serve_loc1T,
+  x5 = atp_training_data$prev_intended_serve_loc1Wide,
+  x6 = atp_training_data$prev_intended_serve_loc2T,
+  x7 = atp_training_data$prev_intended_serve_loc2Wide,
+  x8 = atp_training_data$returner_backhand_locT,
+  x9 = atp_training_data$point_importance,
+  x10 = atp_training_data$server_handL,
+  x11 = atp_training_data$court_side_ad,
+  K = 3
+)
 # -- Variables omitted:
 # is_prev_doublefault, is_prev_ace, is_break_point, z_ball_at_serve
 
@@ -129,13 +146,15 @@ atp_stan_datalist4 <- list(
 # -- Model 3: Global intercept + covariates
 # -- Model 4: Player-varying intercept + covariates
 # -- Model 5: Player-varying intercept and PI + covariates
+# -- Model 6: Global intercept + covariates w/o interactions
 # -- Model X: Stuff with Generated Quantities (pointwise log-lik & predictions)
 
-atp_model1 <- cmdstan_model('./modelling/stan_files/model_1.stan')
-atp_model2 <- cmdstan_model('./modelling/stan_files/model_2.stan')
-atp_model3 <- cmdstan_model('./modelling/stan_files/model_3.stan')	
-atp_model4 <- cmdstan_model('./modelling/stan_files/model_4.stan')
-atp_model5 <- cmdstan_model('./modelling/stan_files/model_5.stan')
+atp_model1 <- cmdstan_model('./modelling/stan_files/loglik_stan/loglik_model_1.stan')
+atp_model2 <- cmdstan_model('./modelling/stan_files/loglik_stan/loglik_model_2.stan')
+atp_model3 <- cmdstan_model('./modelling/stan_files/loglik_stan/loglik_model_3.stan')	
+atp_model4 <- cmdstan_model('./modelling/stan_files/loglik_stan/loglik_model_4.stan')
+atp_model5 <- cmdstan_model('./modelling/stan_files/loglik_stan/loglik_model_5.stan')
+atp_model6 <- cmdstan_model('./modelling/stan_files/loglik_stan/loglik_model_6.stan')
 # -- ADVI version the fastest MCMC to fit
 fit_atp_model1 <- atp_model1$variational(
   data = atp_stan_datalist1,
@@ -162,27 +181,10 @@ fit_atp_model5 <- atp_model5$variational(
   tol_rel_obj = 0.001
 )
 
-# -- Check out summaries (too dense if you're including log likelihoods in
-#    generated quantities)
-fit_atp_model3$cmdstan_summary()
-fit_atp_model3$summary()
-
-
-fit_atp_model4$summary(variables = c("B_1", "B_2", 'B_3', 
-                                     "B_4", "B_5", 'B_6',
-                                     'B_7', "B_8", 'B_9',
-                                     'B_10', 'B_11', 'B_12',
-                                     'B_13'))
-
-# -- Plot posteriors
-bayesplot::mcmc_hist(fit_atp_model1$draws(c("B_0")))
-
-bayesplot::mcmc_hist(fit_atp_model4$draws(c("B_1", "B_2", 'B_3', 
-                                            "B_4", "B_5", 'B_6')))
-
-bayesplot::mcmc_hist(fit_atp_model4$draws(c("B_7", "B_8", 'B_9',
-                                            'B_10', 'B_11', 'B_12',
-                                            'B_13')))
+fit_atp_model6 <- atp_model6$variational(
+  data = atp_stan_datalist6,
+  tol_rel_obj = 0.001
+)
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 ### =====     STAN MODEL DIAGNOSTICS / PERFORMANCE                =====
@@ -203,18 +205,24 @@ stanfit2 <- rstan::read_stan_csv(fit_atp_model2$output_files())
 stanfit3 <- rstan::read_stan_csv(fit_atp_model3$output_files())
 stanfit4 <- rstan::read_stan_csv(fit_atp_model4$output_files())
 stanfit5 <- rstan::read_stan_csv(fit_atp_model5$output_files())
+stanfit6 <- rstan::read_stan_csv(fit_atp_model6$output_files())
 # -- Save model fits
-saveRDS(stanfit1, file = "./modelling/saved_models/fit1.RDS")
-saveRDS(stanfit2, file = "./modelling/saved_models/fit2.RDS")
-saveRDS(stanfit3, file = "./modelling/saved_models/fit3.RDS")
-saveRDS(stanfit4, file = "./modelling/saved_models/fit4.RDS")
-saveRDS(stanfit5, file = "./modelling/saved_models/fit5.RDS")
+saveRDS(stanfit1, file = "./modelling/saved_models/advi/loglik_fit1.RDS")
+saveRDS(stanfit2, file = "./modelling/saved_models/advi/loglik_fit2.RDS")
+saveRDS(stanfit3, file = "./modelling/saved_models/advi/loglik_fit3.RDS")
+saveRDS(stanfit4, file = "./modelling/saved_models/advi/loglik_fit4.RDS")
+saveRDS(stanfit5, file = "./modelling/saved_models/advi/loglik_fit5.RDS")
+saveRDS(stanfit6, file = "./modelling/saved_models/advi/loglik_fit6.RDS")
+
 # -- Load previous models, if already saved
-stanfit1 <- readRDS("./modelling/saved_models/fit1.RDS")
-stanfit2 <- readRDS("./modelling/saved_models/fit2.RDS")
-stanfit3 <- readRDS("./modelling/saved_models/fit3.RDS")
-stanfit4 <- readRDS("./modelling/saved_models/fit4.RDS")
-stanfit5 <- readRDS("./modelling/saved_models/fit5.RDS")
+stanfit1 <- readRDS("./modelling/saved_models/advi/loglik_fit1.RDS")
+stanfit2 <- readRDS("./modelling/saved_models/advi/loglik_fit2.RDS")
+stanfit3 <- readRDS("./modelling/saved_models/advi/loglik_fit3.RDS")
+stanfit4 <- readRDS("./modelling/saved_models/advi/loglik_fit4.RDS")
+stanfit5 <- readRDS("./modelling/saved_models/advi/loglik_fit5.RDS")
+stanfit6 <- readRDS("./modelling/saved_models/advi/loglik_fit6.RDS")
+
+
 # Compute PSIS-LOO (an approximation to exact LOO-CV?)
 log_lik_1 <- loo::extract_log_lik(stanfit1, merge_chains = FALSE)
 r_eff_1 <- loo::relative_eff(exp(log_lik_1), cores = 2)
@@ -241,55 +249,135 @@ r_eff_5 <- loo::relative_eff(exp(log_lik_5), cores = 2)
 loo_5 <- loo::loo(log_lik_5, r_eff = r_eff_5, cores = 2)
 print(loo_5)
 
+log_lik_6 <- loo::extract_log_lik(stanfit6, merge_chains = FALSE)
+r_eff_6 <- loo::relative_eff(exp(log_lik_6), cores = 2)
+loo_6 <- loo::loo(log_lik_6, r_eff = r_eff_6, cores = 2)
+print(loo_6)
+
 
 # elpd_loo: expected log predictive density (High elpd == more predictive power)
 # p_loo: Effective number of parameters
 # looic: LOO Information Criterion
 
 # Compare models
-comp <- loo::loo_compare(loo_1, loo_2, loo_3, loo_4, loo_5)
+comp <- loo::loo_compare(loo_1, loo_2, loo_3, loo_4, loo_5, loo_6)
 print(comp)
+
 
 # -- model averaging weights based on Bayesian stacking
 lpd_point <- cbind(loo_1$pointwise[,"elpd_loo"],
                    loo_2$pointwise[,"elpd_loo"],
                    loo_3$pointwise[,"elpd_loo"],
                    loo_4$pointwise[,"elpd_loo"],
-                   loo_5$pointwise[,"elpd_loo"]
+                   loo_5$pointwise[,"elpd_loo"],
+                   loo_6$pointwise[,"elpd_loo"]
                    )
 loo::stacking_weights(lpd_point)
 
 
-# -- estimated difference of expected leave-one-out prediction errors between the two models
-# -- 
-# -- Here, model 2 is preferred
 
+# -- In ADVI (approximate sampling) we have:
+# Method: stacking
+# ------
+#   weight
+# model1 0.020 
+# model2 0.000 
+# model3 0.013 
+# model4 0.630 
+# model5 0.337 
+# model6 0.000 
 
+# --> Model 4 (Random intercept + Fixed covariates is the winner!!!)
+# --> Model 5 (Random intercept + random PI + fixed covariates in 2nd place)
+# --> Model 3 (Common intercept + fixed covariates in 3rd place)
 
 
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
-### =====            Diagnose STAN Model 2                        =====
+### ===  Which players have the largest random intercepts?       =====
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 # -- Expect Federer to serve towards T
-draws_df <- posterior::as_draws_df(fit_atp_model2$draws())
-post_means <- colMeans(draws_df[,5:(76*2)])
-post_means_T <- post_means[rep(c(TRUE, FALSE), times = 74)]
-post_means_Wide <- post_means[rep(c(FALSE, TRUE), times = 74)]
+
+draws_df <- posterior::as_draws_df(stanfit4)
+random_intercepts_df <- draws_df[,31:178]
+
+# # # # # # # # # # # 
+# Recall: 1 = T
+#         2 = Wide
+#         3 = Body
+# # # # # # # # # # # 
+
+post_means_T <- colMeans(random_intercepts_df[rep(c(TRUE, FALSE), times = 74)])
+post_means_Wide <- colMeans(random_intercepts_df[rep(c(FALSE, TRUE), times = 74)])
 
 # -- Players most likely to serve T
-post_means_T[order(post_means_T)]
+post_means_T[order(post_means_T, decreasing = TRUE)]
+
+top_ID_T <- order(post_means_T, decreasing = TRUE)[1:8]
 atp_training_data %>%
   select(server_name, server_index) %>%
   distinct() %>%
-  filter(server_index %in% c(18,62,47,56,6,19,69,70, 44, 51))
+  filter(server_index %in% top_ID_T)
 
+# Note: Ranking is {Rublev, Klizan, Gojowczyk, Federer, Galan, Wawrinka, }
 
 # -- Players most likely to serve Wide
-post_means_Wide[order(post_means_Wide)]
-order(post_means_Wide)
+post_means_Wide[order(post_means_Wide,  decreasing = TRUE)]
+top_ID_Wide <- order(post_means_Wide, decreasing = TRUE)[1:8]
 atp_training_data %>%
   select(server_name, server_index) %>%
   distinct() %>%
-  filter(server_index %in% c(74,42,47,22,71,45,31,16,34,17))
+  filter(server_index %in% top_ID_Wide )
+
+# Note: Ranking is {Sock, ALTMAIER, CILIC, POUILLE, HARRIS, THIEM }
+
+
+
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+### ===  Covariate posterior plots       =====
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+# -- Check out POSTERIOR DISTRIBUTIONS
+
+var_names <- c("B_1[1]", "B_1[2]", 
+               "B_2[1]", "B_2[2]",
+               'B_3[1]', 'B_3[2]', 
+               "B_4[1]", "B_4[2]", 
+               "B_5[1]", "B_5[2]", 
+               'B_6[1]', "B_6[2]", 
+               'B_7[1]', "B_7[2]", 
+               "B_8[1]", "B_8[2]", 
+               'B_9[1]', "B_9[2]", 
+               'B_10[1]', "B_10[2]",  
+               'B_11[1]', "B_11[2]", 
+               'B_12[1]', "B_12[2]", 
+               'B_13[1]', "B_13[2]" 
+               )
+
+# Recall:
+# x1 = is_second_serve,
+# x2 = serve_impact_from_center,
+# x3 = distance_inside_serve,
+# x4 = prev_intended_serve_loc1T,
+# x5 = prev_intended_serve_loc1Wide,
+# x6 = prev_intended_serve_loc2T,
+# x7 = prev_intended_serve_loc2Wide,
+# x8 = returner_backhand_locT,
+# x9 = point_importance,
+# x10 = server_handL,
+# x11 = court_side_ad,
+# x12 = interaction_s_hand_court_side,
+# x13 = interaction_ss_bh_T,
+
+# T parameter plots
+bayesplot::mcmc_hist(stanfit4, 
+                     pars = var_names[rep(c(TRUE, FALSE), times = 13)]
+                      )
+
+# Wide parameter plots
+bayesplot::mcmc_hist(stanfit4, 
+                     pars = var_names[rep(c(FALSE, TRUE), times = 13)]
+)
+
+
+
 
