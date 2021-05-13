@@ -162,7 +162,7 @@ atp_plot_serve_impact_df %>%
   theme(strip.background =element_rect(fill="#f7e3c3"),
         strip.text.x = element_text(size = 10, face = 'bold'),
         legend.position = "none") +
-  labs(x = 'Lateral Ball Position at\nServe Impact', y = 'Lateral Position\n(Metres)',
+  labs(x = 'Serve Direction', y = 'Lateral Position\n(Metres)',
        fill = '',
        title = "Right-Handed Men's Impact\n Position on Deuce Court"
        #caption = 'Data: Roland Garros\n2019-20'
@@ -219,6 +219,7 @@ atp_plot_serve_impact_df %>%
        fill = '',
        title = 'ATP Left-Hander Serve Lateral\nDisplacement on Deuce Court',
        caption = 'Data: Roland Garros\n2019-20')
+
 
 
 atp_plot_serve_impact_df %>%
@@ -280,4 +281,37 @@ wta_plot_serve_impact_df %>%
        fill = '',
        title = 'WTA Right-Hander Serve Lateral\nDisplacement on Deuce Court',
        caption = 'Data: Roland Garros\n2019-20')
+
+
+
+# ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
+# -- How much do players vary their serve impact location? -----
+# ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
+result_df <-
+atp_plot_serve_impact_df %>%
+  filter(abs(dist_inside_baseline) < 5) %>%
+  filter(serve_impact_from_center < 3) %>%
+  group_by(server_name, court_side) %>%
+  summarise(avg_long = mean(dist_inside_baseline),
+            sd_long = sd(dist_inside_baseline),
+            avg_lat = mean(serve_impact_from_center),
+            sd_lat = sd(serve_impact_from_center)
+            )
+
+
+result_df %>%
+  arrange(desc(avg_long)) %>%
+  View()
+
+result_df %>%
+  arrange(desc(avg_lat)) %>%
+  View()
+
+result_df %>%
+  arrange(desc(sd_long)) %>%
+  View()
+
+result_df %>%
+  arrange(desc(sd_lat)) %>%
+  View()
 
