@@ -16,13 +16,29 @@ data{
     real x10[N]; // 
     real x11[N]; // 
     int K; // No. of response group categories
+
+    // # Set possibility to predict with STAN
+  
+    real x1_test; // Specify Predictor variables individually...
+    real x2_test;
+    real x3_test;
+    real x4_test; // Specify Predictor variables individually...
+    real x5_test;
+    real x6_test;
+    real x7_test; // Specify Predictor variables individually...
+    real x8_test;
+    real x9_test;
+    real x10_test; // Specify Predictor variables individually...
+    real x11_test;
+    int test_p_id;
+
 }
 parameters{
   // Fixed Effects
     real B_0[K-1];  // intercepts for each response level
-    real B_1[K-1];	// fixed effect for variable 1
-    real B_2[K-1];	// fixed effect for variable 2
-    real B_3[K-1];	// fixed effect for variable 3
+    real B_1[K-1];  // fixed effect for variable 1
+    real B_2[K-1];  // fixed effect for variable 2
+    real B_3[K-1];  // fixed effect for variable 3
     real B_4[K-1];  // 
     real B_5[K-1];  // 
     real B_6[K-1];  // 
@@ -79,21 +95,20 @@ model{
         y[i] ~ categorical_logit( p );
     }
 }
-
-  // Save pointwise log-likelihood to calculate LOO-CV and WAIC for model diagnostics
-  // Save a vector of length N for the log likelihood values
-  // categorical_logit_lpmf generates the likelihood of each observation, conditional
-  // on the model. 
+// NOTE: The generated quantities block it is a function of the test data (prediction!)
 generated quantities{
     matrix[K-1,K-1] Rho_id1;
-    vector[N] log_lik;
+    int y_test;
+    vector[K] y_test_pred;
     Rho_id1 = L_Rho_id1 * L_Rho_id1';
 
-    for ( i in 1:N ) {
-        vector[K] p;
-        for ( k in 1:(K-1) ) 
-            p[k] = (B_0[k] + v_id1[id_1[i],k]) + B_1[k] * x1[i] + B_2[k] * x2[i] + B_3[k] * x3[i] + B_4[k] * x4[i] + B_5[k] * x5[i] + B_6[k] * x6[i] + B_7[k] * x7[i] + B_8[k] * x8[i] + B_9[k] * x9[i] + B_10[k] * x10[i] + B_11[k] * x11[i];
-        p[K] = 0;
-        log_lik[i] = categorical_logit_lpmf( y[i] | p );
-    }
+
+    vector[K] p;
+    for ( resp_lev in 1:(K-1) ) 
+        p[resp_lev] = (B_0[resp_lev] + v_id1[id_1[test_p_id],resp_lev]) + B_1[resp_lev] * x1_test + B_2[resp_lev] * x2_test + B_3[resp_lev] * x3_test + B_4[resp_lev] * x4_test + B_5[resp_lev] * x5_test + B_6[resp_lev] * x6_test + B_7[resp_lev] * x7_test + B_8[resp_lev] * x8_test + B_9[resp_lev] * x9_test + B_10[resp_lev] * x10_test + B_11[resp_lev] * x11_test;
+    p[K] = 0;
+
+    y_test_pred = softmax(p);
+    y_test = categorical_logit_rng(p);
+
 }

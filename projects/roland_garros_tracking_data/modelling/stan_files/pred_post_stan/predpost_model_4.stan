@@ -15,14 +15,16 @@ data{
     real x9[N]; // 
     real x10[N]; // 
     real x11[N]; // 
+    real x12[N]; // 
+    real x13[N]; // 
     int K; // No. of response group categories
 }
 parameters{
   // Fixed Effects
     real B_0[K-1];  // intercepts for each response level
-    real B_1[K-1];	// fixed effect for variable 1
-    real B_2[K-1];	// fixed effect for variable 2
-    real B_3[K-1];	// fixed effect for variable 3
+    real B_1[K-1];  // fixed effect for variable 1
+    real B_2[K-1];  // fixed effect for variable 2
+    real B_3[K-1];  // fixed effect for variable 3
     real B_4[K-1];  // 
     real B_5[K-1];  // 
     real B_6[K-1];  // 
@@ -31,6 +33,8 @@ parameters{
     real B_9[K-1];  // 
     real B_10[K-1];  // 
     real B_11[K-1];  // 
+    real B_12[K-1];  // 
+    real B_13[K-1];  // 
 
  // Random Effects
     matrix[K-1,N_1] z_id1; // matrix of group1 standardized random effects
@@ -63,6 +67,8 @@ model{
     B_9 ~ normal(0,3);
     B_10 ~ normal(0,3);
     B_11 ~ normal(0,3);
+    B_12 ~ normal(0,3);
+    B_13 ~ normal(0,3);
 
     // hyper-prior
     to_vector(z_id1) ~ normal(0,3);
@@ -74,7 +80,7 @@ model{
     for ( i in 1:N ) {
         vector[K] p;
         for ( k in 1:(K-1) ) 
-            p[k] = (B_0[k] + v_id1[id_1[i],k]) + B_1[k] * x1[i] + B_2[k] * x2[i] + B_3[k] * x3[i] + B_4[k] * x4[i] + B_5[k] * x5[i] + B_6[k] * x6[i] + B_7[k] * x7[i] + B_8[k] * x8[i] + B_9[k] * x9[i] + B_10[k] * x10[i] + B_11[k] * x11[i];
+            p[k] = (B_0[k] + v_id1[id_1[i],k]) + B_1[k] * x1[i] + B_2[k] * x2[i] + B_3[k] * x3[i] + B_4[k] * x4[i] + B_5[k] * x5[i] + B_6[k] * x6[i] + B_7[k] * x7[i] + B_8[k] * x8[i] + B_9[k] * x9[i] + B_10[k] * x10[i] + B_11[k] * x11[i] + B_12[k] * x12[i] + B_13[k] * x13[i];
         p[K] = 0;
         y[i] ~ categorical_logit( p );
     }
@@ -92,7 +98,7 @@ generated quantities{
     for ( i in 1:N ) {
         vector[K] p;
         for ( k in 1:(K-1) ) 
-            p[k] = (B_0[k] + v_id1[id_1[i],k]) + B_1[k] * x1[i] + B_2[k] * x2[i] + B_3[k] * x3[i] + B_4[k] * x4[i] + B_5[k] * x5[i] + B_6[k] * x6[i] + B_7[k] * x7[i] + B_8[k] * x8[i] + B_9[k] * x9[i] + B_10[k] * x10[i] + B_11[k] * x11[i];
+            p[k] = (B_0[k] + v_id1[id_1[i],k]) + B_1[k] * x1[i] + B_2[k] * x2[i] + B_3[k] * x3[i] + B_4[k] * x4[i] + B_5[k] * x5[i] + B_6[k] * x6[i] + B_7[k] * x7[i] + B_8[k] * x8[i] + B_9[k] * x9[i] + B_10[k] * x10[i] + B_11[k] * x11[i] + B_12[k] * x12[i] + B_13[k] * x13[i];
         p[K] = 0;
         log_lik[i] = categorical_logit_lpmf( y[i] | p );
     }
