@@ -461,7 +461,7 @@ wta_rolandgarros_training_data_with_importance <-
                                   set_x = s_cum_sets, 
                                   set_y = r_cum_sets,
                                   tiebreak = is_tiebreak, 
-                                  bestof3 = FALSE)
+                                  bestof3 = TRUE)
   )
 
 # ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### --- ### 
