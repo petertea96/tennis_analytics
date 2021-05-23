@@ -158,8 +158,16 @@ waic2 <- waic(log_lik_2)
 waic4 <- waic(log_lik_4)
 print(loo_compare(waic1, waic2, waic4))
 
+# waic is -2*elpd_diff
 
-
+# Weights
+waics <- c(
+  waic1$estimates["elpd_waic", 1],
+  waic2$estimates["elpd_waic", 1],
+  waic4$estimates["elpd_waic", 1]
+)
+waic_wts <- exp(waics) / sum(exp(waics))
+waic_wts
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 ### ==  FITTING STAN BAYESIAN MODELS W/ WTA DATA           =====
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###

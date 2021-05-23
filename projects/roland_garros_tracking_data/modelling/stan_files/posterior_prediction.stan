@@ -97,13 +97,13 @@ model{
 }
 // NOTE: The generated quantities block it is a function of the test data (prediction!)
 generated quantities{
+    vector[K] p;
     matrix[K-1,K-1] Rho_id1;
     int y_test;
     vector[K] y_test_pred;
     Rho_id1 = L_Rho_id1 * L_Rho_id1';
 
-
-    vector[K] p;
+    
     for ( resp_lev in 1:(K-1) ) 
         p[resp_lev] = (B_0[resp_lev] + v_id1[id_1[test_p_id],resp_lev]) + B_1[resp_lev] * x1_test + B_2[resp_lev] * x2_test + B_3[resp_lev] * x3_test + B_4[resp_lev] * x4_test + B_5[resp_lev] * x5_test + B_6[resp_lev] * x6_test + B_7[resp_lev] * x7_test + B_8[resp_lev] * x8_test + B_9[resp_lev] * x9_test + B_10[resp_lev] * x10_test + B_11[resp_lev] * x11_test;
     p[K] = 0;

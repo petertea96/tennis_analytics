@@ -32,7 +32,7 @@ peter_theme <- function(number_text_color = 'black',
     
     plot.caption=element_text(hjust=1, 
                               size=8.5,
-                              margin=margin(t=-17),
+                              margin=margin(t=-12),
                               family=family_font, 
                               face='italic'),
     
@@ -42,7 +42,7 @@ peter_theme <- function(number_text_color = 'black',
     #grids
     panel.grid.major.x = element_line(colour="#E5E4E2", size=0.5),
     panel.grid.minor.x = element_blank(),
-    panel.grid.major.y = element_line(colour="#E5E4E2", size=0.01),
+    panel.grid.major.y = element_line(colour="#E5E4E2", size=0.5),
     panel.grid.minor.y = element_blank(), 
     
     
@@ -57,11 +57,13 @@ peter_theme <- function(number_text_color = 'black',
       vjust = 0.7,
       hjust = 0.6,
       size = 12,
+      family=family_font,
       face = 'bold'),
     
     
     axis.text.x = element_text(hjust=0.5,
                                size = 11,
+                               face = 'bold',
                                color=text_colour),
     axis.text.y = element_text(color=text_colour, 
                                size=11,
