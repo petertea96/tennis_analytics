@@ -13,17 +13,21 @@ This repo contains the `The Analysis of Serve Decisions in Tennis using Bayesian
 
 `prototypes`
 ------------
+* Legacy code that may contain some useful - albeit completely scattered - bits of code
 
 
 `collect_data`
 --------------
 * Scrape Roland Garros tracking data
 * Scrape AO tracking data
+* Process dataframes into a useable format with all covariates of interest
 
 `eda`
-
+------
+* Plots for the EDA section
+* Eg: Federer's point importance, serve speeds vs serve number, player-specific heatmaps
 
 `src`
 -----
-* All code required to fit Bayesian MNL models (fixed + varying intercepts)
+* Contains some functions that I repeatedly use throughout the project
 
