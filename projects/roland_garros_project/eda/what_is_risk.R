@@ -10,8 +10,8 @@ library(dplyr)
 library(ggplot2)
 library(ggridges)
 
-setwd("/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data/")
-source(file = "/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data/src/ggplot_theme.R")
+setwd("/Users/petertea/tennis_analytics/projects/roland_garros_project/")
+source(file = "/Users/petertea/tennis_analytics/projects/roland_garros_project/src/ggplot_theme.R")
 
 training_data <- read.csv('./collect_data/data/atp_processed_roland_garros_tracking_data.csv',
                           stringsAsFactors = FALSE)
@@ -59,11 +59,12 @@ ggplot(data = plot_speed_data,
   labs(x = "Speed (KM/H)", 
        y = "",
        title = 'Serve Speed Densities',
-       fill = 'Serve Number',
-       caption = 'Roland Garros\n2019-20') +
+       fill = 'Serve Number'#,
+       #caption = 'Roland Garros\n2019-20'
+       ) +
   peter_theme(family_font = 'Tahoma')
 
-ggsave('serve_speeds.jpg',
+ggsave('./eda/plots/serve_speeds.jpg',
        width=6, height=4,
        dpi = 300)
 

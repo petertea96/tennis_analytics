@@ -3,7 +3,7 @@
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 # -- Plot Player Intercepts (Wide vs T) for Model 2 (Not Model 4)
 # -- Plot tranformed intercept from logit scale --> probability scale
-setwd("/Users/petertea/tennis_analytics/projects/roland_garros_project//")
+setwd("/Users/petertea/tennis_analytics/projects/roland_garros_project/")
 
 library(dplyr)
 library(rstan)
@@ -307,9 +307,9 @@ wta_labels <- c('O.JABEUR', 'K.SINIAKOVA', 'N.OSAKA',
 
 ggplot(wta_plot_data,
        aes(x = mean_t, y = mean_wide)) +
-  geom_abline(intercept = 0, slope = 1, size = 0.5,linetype='dashed') +
+  geom_abline(intercept = 0, slope = 1, size = 0.25,linetype='dashed') +
   geom_point(shape = 21,
-             size = 2.5,
+             size = 2,
              alpha = 0.75,
              fill = '#EC7063') +
   geom_point(data = wta_plot_data  %>%
@@ -318,7 +318,7 @@ ggplot(wta_plot_data,
              aes(x = mean_t, y = mean_wide),
              fill = '#ffeda5',
              shape = 21,
-             size = 2.8) +
+             size = 2.5) +
   # WILLIAMS
   geom_label_repel(data = wta_plot_data %>%
                      filter(name =='S.WILLIAMS'),
@@ -374,8 +374,8 @@ ggplot(wta_plot_data,
                        x = mean_t,
                        label = name),
                    fill = '#EC7063',
-                   nudge_y = 0.025,
-                   nudge_x = 0.01,
+                   nudge_y = -0.01,
+                   nudge_x = 0.04,
                    fontface = 'bold',
                    size = 2.3,
                    show.legend = FALSE,
@@ -438,8 +438,8 @@ ggplot(wta_plot_data,
                        x = mean_t,
                        label = name),
                    fill = '#EC7063',
-                   nudge_y = 0.01,
-                   nudge_x = 0.01,
+                   nudge_y = 0.0,
+                   nudge_x = 0.03,
                    fontface = 'bold',
                    size = 2.3,
                    show.legend = FALSE,
@@ -486,11 +486,14 @@ ggplot(wta_plot_data,
        y = 'Mean Prob(Wide)'#,
        #caption="Roland Garros 2019-20"
   ) +
-  scale_y_continuous(breaks = c(0.2, 0.3, 0.4, 0.5))+
+  ylim(0.2, 0.55) + 
+  xlim(0.2, 0.56) +
+  #scale_y_continuous(breaks = c(0.2, 0.3, 0.4, 0.5))+
+  #scale_x_continuous(breaks = c(0.2, 0.3, 0.4, 0.5))+
   peter_theme(family_font = 'Tahoma') 
 
 ggsave('./modelling/plots/wta_comparing_player_probs.jpg',
-       width=5.5, height=4,
+       width=6, height=4,
        dpi = 280)
 
 # -- ATP
@@ -503,17 +506,17 @@ atp_plot_data %>%
   arrange(desc(mean_t)) %>%
   View()
 
-atp_labels <- c('D.SHAPOVALOV', 'D.THIEM', 'S.WAWRINKA',
+atp_labels <- c('D.SHAPOVALOV', 'D.THIEM', #'S.WAWRINKA',
                 'R.FEDERER', 'N.DJOKOVIC', 'R.NADAL',
                 'J.DELPOTRO', 'A.RUBLEV', 'A.ZVEREV',
-                'A.MURRAY', 'J.SOCK' #'S.TSITSIPAS'
+                'A.MURRAY'#, 'J.SOCK' #'S.TSITSIPAS'
                 )
 
 ggplot(data = atp_plot_data,
        aes(x = mean_t, y = mean_wide)) +
-  geom_abline(intercept = 0, slope = 1, size = 0.5,linetype='dashed') +
+  geom_abline(intercept = 0, slope = 1, size = 0.25,linetype='dashed') +
   geom_point(shape = 21,
-             size = 2.5,
+             size = 2,
              alpha = 0.75,
              fill = '#5DADE2') +
   geom_point(data = atp_plot_data %>%
@@ -521,7 +524,7 @@ ggplot(data = atp_plot_data,
              aes(x = mean_t, y = mean_wide),
              fill = '#ffeda5',
              shape = 21,
-             size = 2.8) +
+             size = 2.5) +
   geom_label_repel(data = atp_plot_data %>%
                      filter(name =='R.FEDERER'),
                    aes(y = mean_wide,
@@ -529,7 +532,7 @@ ggplot(data = atp_plot_data,
                        label = name),
                    fill = '#5DADE2',
                    nudge_y = 0.0,
-                   nudge_x = 0.03,
+                   nudge_x = 0.04,
                    fontface = 'bold',
                    size = 2.3,
                    show.legend = FALSE,
@@ -544,7 +547,7 @@ ggplot(data = atp_plot_data,
                        x = mean_t,
                        label = name),
                    fill = '#5DADE2',
-                   nudge_y = -0.03,
+                   nudge_y = -0.035,
                    nudge_x = -0.015,
                    fontface = 'bold',
                    size = 2.3,
@@ -560,8 +563,8 @@ ggplot(data = atp_plot_data,
                        x = mean_t,
                        label = name),
                    fill = '#5DADE2',
-                   nudge_y = 0.025,
-                   nudge_x = 0.025,
+                   nudge_y = 0.03,
+                   nudge_x = 0.035,
                    fontface = 'bold',
                    size = 2.3,
                    show.legend = FALSE,
@@ -576,8 +579,8 @@ ggplot(data = atp_plot_data,
                        x = mean_t,
                        label = name),
                    fill = '#5DADE2',
-                   nudge_y = 0.018,
-                   nudge_x = -0.01,
+                   nudge_y = 0.023,
+                   nudge_x = -0.04,
                    fontface = 'bold',
                    size = 2.3,
                    show.legend = FALSE,
@@ -592,8 +595,8 @@ ggplot(data = atp_plot_data,
                        x = mean_t,
                        label = name),
                    fill = '#5DADE2',
-                   nudge_y = 0.01,
-                   nudge_x = 0.018,
+                   nudge_y = 0.022,
+                   nudge_x = 0.03,
                    fontface = 'bold',
                    size = 2.3,
                    show.legend = FALSE,
@@ -608,7 +611,7 @@ ggplot(data = atp_plot_data,
                        x = mean_t,
                        label = name),
                    fill = '#5DADE2',
-                   nudge_y = -0.01,
+                   nudge_y = -0.032,
                    nudge_x = 0.0,
                    fontface = 'bold',
                    size = 2.3,
@@ -625,7 +628,7 @@ ggplot(data = atp_plot_data,
                        label = name),
                    fill = '#5DADE2',
                    nudge_y = -0.01,
-                   nudge_x = 0.0,
+                   nudge_x = 0.04,
                    fontface = 'bold',
                    size = 2.3,
                    show.legend = FALSE,
@@ -634,23 +637,23 @@ ggplot(data = atp_plot_data,
                                  length = unit(0.015, "npc")),
                    point.padding = unit(0.5, "lines"),
                    label.padding = unit(0.25, "lines")) +
-  geom_label_repel(data = atp_plot_data %>%
-                     filter(name =='S.WAWRINKA'),
-                   aes(y = mean_wide,
-                       x = mean_t,
-                       label = name),
-                   fill = '#5DADE2',
-                   #alpha = 0.8,
-                   nudge_y = 0.02,
-                   nudge_x = 0.02,
-                   fontface = 'bold',
-                   size = 2.3,
-                   show.legend = FALSE,
-                   arrow = arrow(ends ='last',
-                                 type = 'closed',
-                                 length = unit(0.015, "npc")),
-                   point.padding = unit(0.5, "lines"),
-                   label.padding = unit(0.25, "lines")) +
+  # geom_label_repel(data = atp_plot_data %>%
+  #                    filter(name =='S.WAWRINKA'),
+  #                  aes(y = mean_wide,
+  #                      x = mean_t,
+  #                      label = name),
+  #                  fill = '#5DADE2',
+  #                  #alpha = 0.8,
+  #                  nudge_y = 0.02,
+  #                  nudge_x = 0.02,
+  #                  fontface = 'bold',
+  #                  size = 2.3,
+  #                  show.legend = FALSE,
+  #                  arrow = arrow(ends ='last',
+  #                                type = 'closed',
+  #                                length = unit(0.015, "npc")),
+  #                  point.padding = unit(0.5, "lines"),
+  #                  label.padding = unit(0.25, "lines")) +
   geom_label_repel(data = atp_plot_data %>%
                      filter(name =='A.RUBLEV'),
                    aes(y = mean_wide,
@@ -658,7 +661,7 @@ ggplot(data = atp_plot_data,
                        label = name),
                    fill = '#5DADE2',
                    nudge_y = 0,
-                   nudge_x = 0.01,
+                   nudge_x = 0.04,
                    fontface = 'bold',
                    size = 2.3,
                    show.legend = FALSE,
@@ -674,7 +677,7 @@ ggplot(data = atp_plot_data,
                        label = name),
                    fill = '#5DADE2',
                    nudge_y = 0.00,
-                   nudge_x = 0.00,
+                   nudge_x = 0.04,
                    fontface = 'bold',
                    size = 2.3,
                    show.legend = FALSE,
@@ -683,23 +686,7 @@ ggplot(data = atp_plot_data,
                                  length = unit(0.015, "npc")),
                    point.padding = unit(0.5, "lines"),
                    label.padding = unit(0.25, "lines")) +
-  geom_label_repel(data = atp_plot_data %>%
-                     filter(name =='J.SOCK'),
-                   aes(y = mean_wide,
-                       x = mean_t,
-                       label = name),
-                   fill = '#5DADE2',
-                   nudge_y = 0.00,
-                   nudge_x = -0.01,
-                   fontface = 'bold',
-                   size = 2.3,
-                   show.legend = FALSE,
-                   arrow = arrow(ends ='last',
-                                 type = 'closed',
-                                 length = unit(0.015, "npc")),
-                   point.padding = unit(0.5, "lines"),
-                   label.padding = unit(0.25, "lines")) +
-  # geom_label_repel(data = atp_plot_data %>%
+  #geom_label_repel(data = atp_plot_data %>%
   #                    filter(name =='S.TSITSIPAS'),
   #                  aes(y = mean_wide,
   #                      x = mean_t,
@@ -721,12 +708,44 @@ ggplot(data = atp_plot_data,
        y = 'Mean Prob(Wide)'#,
        #caption="Roland Garros 2019-20"
   ) +
-  scale_x_continuous(breaks = c(0.35, 0.4, 0.45, 0.5))+
-  scale_y_continuous(breaks = c(0.35, 0.4, 0.45, 0.5))+
-  ylim(0.3, 0.5) +
+  ylim(0.2, 0.55) + 
+  xlim(0.2, 0.56) +
   peter_theme(family_font = 'Tahoma') 
+  #scale_y_continuous(breaks=seq(0.2,0.5,0.1))+
+  #scale_x_continuous(breaks = c(0.2, 0.3, 0.4, 0.5))
 
 
 ggsave('./modelling/plots/atp_comparing_player_probs.jpg',
-       width=5.5, height=4,
+       width=6, height=4,
        dpi = 280)
+
+
+# -- Everything on one plot
+
+player_labels <- c(
+  'O.JABEUR', 'K.SINIAKOVA', 'N.OSAKA',
+  'M.VONDROUSOVA', 'S.SORRIBESTORMO', 'J.KONTA',
+  'P.KVITOVA', 'S.KENIN', 'S.WILLIAMS',
+  'I.SWIATEK', 'D.SHAPOVALOV', 'D.THIEM', 'S.WAWRINKA',
+  'R.FEDERER', 'N.DJOKOVIC', 'R.NADAL',
+  'J.DELPOTRO', 'A.RUBLEV', 'A.ZVEREV',
+  'A.MURRAY'
+  
+)
+ggplot(data = plot_data,
+       aes(x = mean_t, y = mean_wide)) +
+  geom_abline(intercept = 0, slope = 1, size = 0.25,linetype='dashed') +
+  geom_point(shape = 21,
+             size = 2,
+             alpha = 0.7,
+             aes(fill = gender)) +
+  geom_point(data = plot_data %>%
+               filter(name %in% player_labels),
+             aes(x = mean_t, y = mean_wide),
+             fill = '#ffeda5',
+             shape = 21,
+             size = 2.5) +
+  peter_theme() +
+  ylim(0.2, 0.55) + 
+  xlim(0.2, 0.56) 
+

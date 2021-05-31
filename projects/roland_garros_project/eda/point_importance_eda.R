@@ -2,8 +2,8 @@
 
 library(dplyr)
 library(ggplot2)
-setwd("/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data")
-source(file = "/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data/src/ggplot_theme.R")
+setwd("/Users/petertea/tennis_analytics/projects/roland_garros_project")
+source(file = "/Users/petertea/tennis_analytics/projects/roland_garros_project/src/ggplot_theme.R")
 source('src/gg_tennis_court.R')
 
 
@@ -167,10 +167,10 @@ importance_df %>%
                                  cat_point_importance = cat_point_importance.labs)) + 
 
   labs(x = "", 
-       y = "",
+       y = ""#,
        #title = "Federer Adjusting Serve Direction on Important Points?",
        #title = "Federer's Serve Direction on Varying Important Points",
-       caption ='Data: Roland Garros 2019-20'
+       #caption ='Data: Roland Garros 2019-20'
        )
 
 ggsave('./eda/plots/fed_adjusting_serve_imp.jpg',
@@ -201,10 +201,10 @@ importance_df %>%
              labeller = labeller(court_side = courtside.labs,
                                  cat_point_importance = cat_point_importance.labs)) + 
   labs(x = "", 
-       y = "",
+       y = ""#,
        #title = "Djokovic's Consistent Serve Direction on Important Points",
        #title = "Djokovic's Serve Direction on Varying Important Points",
-       caption ='Data: Roland Garros 2019-20'
+       #caption ='Data: Roland Garros 2019-20'
        )
 
 ggsave('./eda/plots/djokovic_adjusting_serve_imp.jpg',
