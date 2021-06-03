@@ -146,11 +146,21 @@ def get_point_level_info(one_point_sequence):
         except IndexError:
             print('Index Error...')
             
-    ########################################################################## 
-            
-
-
+    ##########################################################################  
+    # Add return Shot locations
+    serve_return_dict = dict(
+        serve_return_net_x = None,
+        serve_return_net_y = None,
+        serve_return_net_z = None,
+        serve_return_bounce_x = None,
+        serve_return_bounce_y = None,
+        serve_return_bounce_z = None)
     
+    if is_track_avail:
+        serve_return_dict = collect_serve_return_locations( one_point_sequence['trajectoryData'] )
+    
+    
+    ##########################################################################
     
     
     # -- Identify whether serve bounce is Body, Wide, or Down the T
@@ -237,6 +247,14 @@ def get_point_level_info(one_point_sequence):
         returner_coord_y = one_point_sequence['receiverCordinate']['y'],
         returner_coord_z = one_point_sequence['receiverCordinate']['z'],
         
+        # serve return locations
+        serve_return_net_x = serve_return_dict['serve_return_net_x'],
+        serve_return_net_y = serve_return_dict['serve_return_net_y'],
+        serve_return_net_z = serve_return_dict['serve_return_net_z'],
+        serve_return_bounce_x = serve_return_dict['serve_return_bounce_x'],
+        serve_return_bounce_y = serve_return_dict['serve_return_bounce_y'],
+        serve_return_bounce_z = serve_return_dict['serve_return_bounce_z'],
+        
         # unknowns
         spin_rpm = one_point_sequence['spin'],
         cruciality = one_point_sequence['cruciality'],
@@ -245,6 +263,58 @@ def get_point_level_info(one_point_sequence):
     
     return point_dict
 
+
+########################################################################################
+########################################################################################
+########################################################################################
+def collect_serve_return_locations(trajectory_data_list):
+    '''
+    trajectory_data_list[list]: each element is a dictionary of ball trajectory (x,y,z)
+    
+    Returns dictionary of return shot at net and on the bounce
+    '''
+    
+    # -- list of "position" keys for each trajectory instance
+    position_keys_list = [ item['position'] for item in trajectory_data_list]
+
+# -- 
+#list(enumerate(position_keys_list))
+# eg: [(0, 'hit'), (1, 'peak'), (2, 'net'), (3, 'last')]
+
+    serve_return_net_x = None
+    serve_return_net_y = None
+    serve_return_net_z = None
+    serve_return_bounce_x = None
+    serve_return_bounce_y = None
+    serve_return_bounce_z = None
+    
+    
+    try:
+        # -- second instance of 'net' (i.e. the return net shot)
+        serve_return_net_index = [index for index, n in enumerate(position_keys_list) if n == 'net'][1]
+        serve_return_bounce_index = [index for index, n in enumerate(position_keys_list) if n == 'bounce'][1]
+
+        serve_return_net_x = trajectory_data_list[serve_return_net_index]['x']
+        serve_return_net_y = trajectory_data_list[serve_return_net_index]['y']
+        serve_return_net_z = trajectory_data_list[serve_return_net_index]['z']
+
+        serve_return_bounce_x = trajectory_data_list[serve_return_bounce_index]['x']
+        serve_return_bounce_y = trajectory_data_list[serve_return_bounce_index]['y']
+        serve_return_bounce_z = trajectory_data_list[serve_return_bounce_index]['z']
+    
+    except IndexError:
+        print('Tracking Data not available!')
+        
+        
+    return dict(
+        serve_return_net_x = serve_return_net_x,
+        serve_return_net_y = serve_return_net_y,
+        serve_return_net_z = serve_return_net_z,
+        serve_return_bounce_x = serve_return_bounce_x,
+        serve_return_bounce_y = serve_return_bounce_y,
+        serve_return_bounce_z = serve_return_bounce_z)
+    
+    
 
 
 ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### ----- ##### 
