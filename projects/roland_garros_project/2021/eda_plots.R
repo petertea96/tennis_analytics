@@ -389,3 +389,113 @@ animate(my_plot, duration = 14, fps = 10, units = 'in', res = 200,
         width = 6, height = 4,
         renderer = gifski_renderer('/Users/petertea/tennis_analytics/projects/roland_garros_project/2021/plots/zverev_nishikori.gif'))
 
+
+# June 7th 2021 -----
+my_match_id <- 'year_2021_SM008_tracking_data.json'
+
+plot_data <- training_data %>%
+  filter(match_id == my_match_id) %>%
+  filter(is_track_avail) %>%
+  #filter(server_name == player_name) %>%
+  dplyr::rowwise() %>%
+  dplyr::mutate(
+    x_new = impute_next_location(x1 = serve_return_impact_x,
+                                 y1 = serve_return_impact_y, 
+                                 x2 = serve_return_bounce_x, 
+                                 y2 = serve_return_bounce_y,
+                                 fwd = 0.75)[1],
+    
+    y_new = impute_next_location(x1 = serve_return_impact_x,
+                                 y1 = serve_return_impact_y, 
+                                 x2 = serve_return_bounce_x, 
+                                 y2 = serve_return_bounce_y,
+                                 fwd = 0.75)[2]
+  ) %>%
+  mutate( x_coord = ifelse( (which_side == 'left'), 
+                            -1 *serve_return_bounce_x,
+                            serve_return_bounce_x),
+          
+          y_coord = ifelse( (which_side == 'left'), 
+                            -1 * serve_return_bounce_y,
+                            serve_return_bounce_y),
+          x_coord_new = ifelse( (which_side == 'left'), 
+                                -1 *x_new,
+                                x_new),
+          
+          y_coord_new = ifelse( (which_side == 'left'), 
+                                -1 * y_new,
+                                y_new)
+  )
+
+
+plot_data %>%
+  
+  group_by(server_name, set_num) %>%
+  summarise(n())
+
+courtside.labs <- c("Advantage Court", "Deuce Court")
+names(courtside.labs) <- c("AdCourt", "DeuceCourt")
+server_name.labs <- c("Zverev Serve Locations", "Nishikori Serve Locations")
+names(server_name.labs) <- c("A.ZVEREV", "K.NISHIKORI")
+
+plot_data %>%
+  filter(x_coord > -2) %>%
+  ggplot(aes(x = x_coord, 
+             y = y_coord)) +
+  draw_half_tennis_court() +
+  lazy_add_heatmap() +
+  geom_segment(aes(x=x_coord,
+                   y=y_coord,
+                   xend = x_coord_new,
+                   yend = y_coord_new),
+               arrow=arrow(length = unit(0.1,"cm"), 
+                           type = "closed",
+                           ends = 'last'),
+               #size=0.2,
+               color="black",
+               alpha = 0.2) +
+  geom_point(alpha = 0.5, fill = 'red', shape = 21,
+             size = 1.5) + 
+  facet_grid(set_num ~ server_name)
+
+
+my_plot <- 
+  plot_data %>%
+  filter(x_coord > -2) %>%
+  ggplot(aes(x = x_coord, 
+             y = y_coord)) +
+  draw_half_tennis_court() +
+  lazy_add_heatmap() +
+  geom_segment(aes(x=x_coord,
+                   y=y_coord,
+                   xend = x_coord_new,
+                   yend = y_coord_new),
+               arrow=arrow(length = unit(0.1,"cm"), 
+                           type = "closed",
+                           ends = 'last'),
+               #size=0.2,
+               color="black",
+               alpha = 0.2) +
+  geom_point(alpha = 0.5, fill = 'red', shape = 21,
+             size = 1.5) +
+  
+  facet_grid(court_side ~ server_name,
+             labeller =  labeller(court_side = courtside.labs,
+                                  server_name = server_name.labs))+ 
+  guides( fill = guide_colourbar( barheight = unit( 2 , "in" ) ))+
+  transition_states(set_num,
+                    state_length = 4, 
+                    transition_length = 4) +
+  enter_fade() +
+  exit_fade() +
+  labs(x = "", 
+       y = "",
+       fill = 'nLevel',
+       title = ". \n Set Number: {closest_state}",
+       caption = 'Data: 2021 Roland Garros'
+  )
+animate(my_plot, duration = 14, fps = 10, units = 'in', res = 200,
+        width = 6, height = 4,
+        renderer = gifski_renderer('/Users/petertea/tennis_analytics/projects/roland_garros_project/2021/plots/zverev_nishikori.gif'))
+
+
