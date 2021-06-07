@@ -149,6 +149,9 @@ def get_point_level_info(one_point_sequence):
     ##########################################################################  
     # Add return Shot locations
     serve_return_dict = dict(
+        serve_return_impact_x = None,
+        serve_return_impact_y = None,
+        serve_return_impact_z = None,
         serve_return_net_x = None,
         serve_return_net_y = None,
         serve_return_net_z = None,
@@ -248,6 +251,9 @@ def get_point_level_info(one_point_sequence):
         returner_coord_z = one_point_sequence['receiverCordinate']['z'],
         
         # serve return locations
+        serve_return_impact_x = serve_return_dict['serve_return_impact_x'],
+        serve_return_impact_y = serve_return_dict['serve_return_impact_y'],
+        serve_return_impact_z = serve_return_dict['serve_return_impact_z'],
         serve_return_net_x = serve_return_dict['serve_return_net_x'],
         serve_return_net_y = serve_return_dict['serve_return_net_y'],
         serve_return_net_z = serve_return_dict['serve_return_net_z'],
@@ -280,7 +286,10 @@ def collect_serve_return_locations(trajectory_data_list):
 # -- 
 #list(enumerate(position_keys_list))
 # eg: [(0, 'hit'), (1, 'peak'), (2, 'net'), (3, 'last')]
-
+    
+    serve_return_impact_x = None
+    serve_return_impact_y = None
+    serve_return_impact_z = None
     serve_return_net_x = None
     serve_return_net_y = None
     serve_return_net_z = None
@@ -291,9 +300,14 @@ def collect_serve_return_locations(trajectory_data_list):
     
     try:
         # -- second instance of 'net' (i.e. the return net shot)
+        serve_return_impact_index = [index for index, n in enumerate(position_keys_list) if n == 'hit'][1]
         serve_return_net_index = [index for index, n in enumerate(position_keys_list) if n == 'net'][1]
         serve_return_bounce_index = [index for index, n in enumerate(position_keys_list) if n == 'bounce'][1]
 
+        serve_return_impact_x = trajectory_data_list[serve_return_impact_index]['x']
+        serve_return_impact_y = trajectory_data_list[serve_return_impact_index]['y']
+        serve_return_impact_z = trajectory_data_list[serve_return_impact_index]['z']
+        
         serve_return_net_x = trajectory_data_list[serve_return_net_index]['x']
         serve_return_net_y = trajectory_data_list[serve_return_net_index]['y']
         serve_return_net_z = trajectory_data_list[serve_return_net_index]['z']
@@ -307,6 +321,9 @@ def collect_serve_return_locations(trajectory_data_list):
         
         
     return dict(
+        serve_return_impact_x = serve_return_impact_x,
+        serve_return_impact_y = serve_return_impact_y,
+        serve_return_impact_z = serve_return_impact_z,
         serve_return_net_x = serve_return_net_x,
         serve_return_net_y = serve_return_net_y,
         serve_return_net_z = serve_return_net_z,

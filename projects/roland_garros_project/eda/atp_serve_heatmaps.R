@@ -5,7 +5,7 @@
 library(dplyr)
 library(ggplot2)
 
-setwd("/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data/")
+setwd("/Users/petertea/tennis_analytics/projects/roland_garros_project/")
 source('src/gg_tennis_court.R')
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
@@ -193,27 +193,14 @@ training_data %>%
   ggplot(aes(x = x_coord, 
              y = y_coord)) +
   draw_half_tennis_court() +
-  stat_density_2d(aes(fill = stat(nlevel)), geom = "polygon",
-                  show.legend = TRUE, 
-                  #bins = 15, 
-                  alpha = .8)+
-  scale_fill_gradientn(colours = c('white','pink1', 'red4')) +
-  #facet_wrap(~ court_side + returner_hand ) + 
+  lazy_add_heatmap() +
   facet_grid(court_side ~ returner_hand,
              labeller = labeller(court_side = courtside.labs,
                                  returner_hand = handedness.labs)) + 
-  theme(strip.background =element_rect(fill="#f7e3c3"),
-        strip.text = element_text(colour = 'black',face = 'bold'),
-        plot.title = element_text(hjust = 0.5),
-        legend.position = 'right',
-        legend.direction = 'vertical',
-        legend.margin=margin(1,1,1,1),
-        plot.caption = element_text(vjust = 6, face = "italic"))+
-  guides( fill = guide_colourbar( barheight = unit( 2 , "in" ) ))+
   labs(x = "", 
        y = "",
        fill = 'nLevel',
-       #title = "Men's 2nd Serve Locations",
+       title = "Men's 2nd Serve Locations",
        caption = 'Data: Roland Garros 2019-20'
        ) 
 
@@ -249,23 +236,10 @@ nadal_plot_comp_data %>%
   ggplot(aes(x = x_coord, 
              y = y_coord)) +
   draw_half_tennis_court() +
-  stat_density_2d(aes(fill = stat(nlevel)), geom = "polygon",
-                  show.legend = TRUE, 
-                  #bins = 15, 
-                  alpha = .8)+
-  scale_fill_gradientn(colours = c('white','pink1', 'red4')) +
-  #facet_wrap(~ court_side + returner_hand ) + 
+  lazy_add_heatmap() +
   facet_grid(court_side ~ not_nadal,
              labeller = labeller(court_side = courtside.labs,
                                  not_nadal = nadal.labs)) + 
-  theme(strip.background =element_rect(fill="#f7e3c3"),
-        strip.text = element_text(colour = 'black',face = 'bold'),
-        plot.title = element_text(hjust = 0.5),
-        legend.position = 'right',
-        legend.direction = 'vertical',
-        legend.margin=margin(1,1,1,1),
-        plot.caption = element_text(vjust = 6, face = "italic"))+
-  guides( fill = guide_colourbar( barheight = unit( 2 , "in" ) )) +
   labs(x = "", 
        y = "",
        fill = 'nLevel',

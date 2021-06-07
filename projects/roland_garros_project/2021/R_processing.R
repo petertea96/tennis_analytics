@@ -68,6 +68,8 @@ rolandgarros_training_data <- rolandgarros_pbp_df %>%
          player1, player2, p1_cum_games, p2_cum_games, 
          p1_cum_sets, p2_cum_sets, match_id, year, 
          is_wta,
+         serve_return_impact_x, serve_return_impact_y,
+         serve_return_impact_z,
          serve_return_net_x, serve_return_net_y,
          serve_return_net_z, serve_return_bounce_x,
          serve_return_bounce_y, serve_return_bounce_z
