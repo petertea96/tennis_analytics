@@ -5,10 +5,10 @@
 library(dplyr)
 library(ggplot2)
 
-setwd("/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data")
+setwd("/Users/petertea/tennis_analytics/projects/roland_garros_project/")
 atp_pbp_df <- read.csv('./collect_data/data/atp_processed_roland_garros_tracking_data.csv',
                        na.strings=c("","NA"))
-source(file = "/Users/petertea/tennis_analytics/projects/roland_garros_tracking_data/src/ggplot_theme.R")
+source(file = "/Users/petertea/tennis_analytics/projects/roland_garros_project/src/ggplot_theme.R")
 
 
 #players_of_interest <- c('R.NADAL', 'R.FEDERER', 'N.DJOKOVIC',
@@ -281,6 +281,57 @@ wta_plot_serve_impact_df %>%
        fill = '',
        title = 'WTA Right-Hander Serve Lateral\nDisplacement on Deuce Court',
        caption = 'Data: Roland Garros\n2019-20')
+
+
+
+# -- Player differences in ball impact location -----
+wta_plot_serve_impact_df %>%
+  group_by(server_name) %>%
+  summarise(mean_long = mean(dist_inside_baseline),
+            mean_lat = mean(serve_impact_from_center)) %>%
+  arrange(desc(mean_long)) %>%
+  View()
+
+wta_players <- c('N.OSAKA', 'I.SWIATEK', 'S.WILLIAMS', 'V.AZARENKA',
+                 'S.KENIN', 'P.KVITOVA')
+
+plot_data <- wta_plot_serve_impact_df %>%
+  filter(server_name %in% wta_players) %>%
+  filter(serve_impact_from_center<5) 
+
+plot_data$server_name <- factor(plot_data$server_name,
+                                   levels = rev(c('I.SWIATEK', 'P.KVITOVA', 'V.AZARENKA',
+                                              'N.OSAKA', 'S.WILLIAMS', 'S.KENIN')))
+
+plot_data %>%
+  ggplot( aes(x = serve_impact_from_center, y = server_name)) +
+  geom_boxplot(fill = 'indianred')  +
+  labs(x = "Lateral Impact (Metres)", 
+       y = "",
+       title = 'Women Serve Lateral Impact',
+       caption = 'Roland Garros\n2019-20'
+  ) + 
+  peter_theme(family_font = 'Tahoma')
+
+
+plot_data2 <- wta_plot_serve_impact_df %>%
+  filter(server_name %in% wta_players) %>%
+  filter(dist_inside_baseline<5) 
+
+plot_data2$server_name <- factor(plot_data2$server_name,
+                                levels = rev(c('I.SWIATEK', 'P.KVITOVA', 'V.AZARENKA',
+                                               'N.OSAKA', 'S.WILLIAMS', 'S.KENIN')))
+plot_data2 %>%
+  filter(server_name %in% wta_players) %>%
+  filter(dist_inside_baseline<5) %>%
+  ggplot( aes(x = dist_inside_baseline, y = server_name)) +
+  geom_boxplot(fill = 'indianred') +
+  labs(x = "Longitudinal Impact (Metres)", 
+       y = "",
+       title = 'Women Serve Longitudinal Impact',
+       caption = 'Roland Garros\n2019-20'
+  ) + 
+  peter_theme(family_font = 'Tahoma')
 
 
 

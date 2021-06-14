@@ -72,7 +72,9 @@ rolandgarros_training_data <- rolandgarros_pbp_df %>%
          serve_return_impact_z,
          serve_return_net_x, serve_return_net_y,
          serve_return_net_z, serve_return_bounce_x,
-         serve_return_bounce_y, serve_return_bounce_z
+         serve_return_bounce_y, serve_return_bounce_z,
+         serve_plus1_bounce_x,
+         serve_plus1_bounce_y, serve_plus1_bounce_z
          
         
   ) %>%

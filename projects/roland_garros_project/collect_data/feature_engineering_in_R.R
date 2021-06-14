@@ -71,7 +71,15 @@ atp_rolandgarros_training_data <- atp_rolandgarros_pbp_df %>%
          is_tiebreak, server_score, returner_score, 
          player1, player2, p1_cum_games, p2_cum_games, 
          p1_cum_sets, p2_cum_sets, match_id, year, 
-         cruciality
+         cruciality,
+         serve_return_impact_x, serve_return_impact_y,
+         serve_return_impact_z, 
+         serve_return_net_x, serve_return_net_y,
+         serve_return_net_z,
+         serve_return_bounce_x, serve_return_bounce_y,
+         serve_return_bounce_z,
+         serve_plus1_bounce_x, serve_plus1_bounce_y,
+         serve_plus1_bounce_z, match_id
   ) %>%
   mutate(
     serve_impact_from_center = abs(y_ball_at_serve),
@@ -207,7 +215,15 @@ wta_rolandgarros_training_data <- wta_rolandgarros_pbp_df %>%
          is_tiebreak, server_score, returner_score, 
          player1, player2, p1_cum_games, p2_cum_games, 
          p1_cum_sets, p2_cum_sets, match_id, year, 
-         cruciality
+         cruciality,
+         serve_return_impact_x, serve_return_impact_y,
+         serve_return_impact_z, 
+         serve_return_net_x, serve_return_net_y,
+         serve_return_net_z,
+         serve_return_bounce_x, serve_return_bounce_y,
+         serve_return_bounce_z,
+         serve_plus1_bounce_x, serve_plus1_bounce_y,
+         serve_plus1_bounce_z, match_id
   ) %>%
   mutate(
     serve_impact_from_center = abs(y_ball_at_serve),

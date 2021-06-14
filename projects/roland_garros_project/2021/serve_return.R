@@ -365,8 +365,8 @@ plot_data %>%
                alpha = 0.2) +
   geom_point(alpha = 0.5, fill = 'red', shape = 21,
              size = 2.5) +
-  facet_wrap(~server_name,
-             labeller = labeller(server_name = server.labs)
+  facet_wrap(~server_name)#,
+             #labeller = labeller(server_name = server.labs)
   ) 
 
 my_plotx <- 

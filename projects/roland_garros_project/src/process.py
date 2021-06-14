@@ -147,7 +147,7 @@ def get_point_level_info(one_point_sequence):
             print('Index Error...')
             
     ##########################################################################  
-    # Add return Shot locations
+    # Add return shots and serve plus 1 locations
     serve_return_dict = dict(
         serve_return_impact_x = None,
         serve_return_impact_y = None,
@@ -159,8 +159,17 @@ def get_point_level_info(one_point_sequence):
         serve_return_bounce_y = None,
         serve_return_bounce_z = None)
     
+    serve_plus1_dict = dict(
+        serve_plus1_bounce_x = None,
+        serve_plus1_bounce_y = None,
+        serve_plus1_bounce_z = None
+    )
+    
+    
+    
     if is_track_avail:
         serve_return_dict = collect_serve_return_locations( one_point_sequence['trajectoryData'] )
+        serve_plus1_dict =collect_serve_plus1_locations( one_point_sequence['trajectoryData'] )
     
     
     ##########################################################################
@@ -261,6 +270,11 @@ def get_point_level_info(one_point_sequence):
         serve_return_bounce_y = serve_return_dict['serve_return_bounce_y'],
         serve_return_bounce_z = serve_return_dict['serve_return_bounce_z'],
         
+        # Serve plus 1 locations
+        serve_plus1_bounce_x = serve_plus1_dict['serve_plus1_bounce_x'],
+        serve_plus1_bounce_y = serve_plus1_dict['serve_plus1_bounce_y'],
+        serve_plus1_bounce_z = serve_plus1_dict['serve_plus1_bounce_z'],
+        
         # unknowns
         spin_rpm = one_point_sequence['spin'],
         cruciality = one_point_sequence['cruciality'],
@@ -331,6 +345,44 @@ def collect_serve_return_locations(trajectory_data_list):
         serve_return_bounce_y = serve_return_bounce_y,
         serve_return_bounce_z = serve_return_bounce_z)
     
+    
+def collect_serve_plus1_locations(trajectory_data_list):
+    '''
+    trajectory_data_list[list]: each element is a dictionary of ball trajectory (x,y,z)
+    
+    Returns dictionary of return shot at net and on the bounce
+    '''
+    
+    # -- list of "position" keys for each trajectory instance
+    position_keys_list = [ item['position'] for item in trajectory_data_list]
+
+# -- 
+#list(enumerate(position_keys_list))
+# eg: [(0, 'hit'), (1, 'peak'), (2, 'net'), (3, 'last')]
+    
+
+    serve_plus1_bounce_x = None
+    serve_plus1_bounce_y = None
+    serve_plus1_bounce_z = None
+    
+    
+    try:
+        # -- Third instance of 'bounce' (i.e. the return net shot)
+        serve_plus1_bounce_index = [index for index, n in enumerate(position_keys_list) if n == 'bounce'][2]
+
+
+        serve_plus1_bounce_x = trajectory_data_list[serve_plus1_bounce_index]['x']
+        serve_plus1_bounce_y = trajectory_data_list[serve_plus1_bounce_index]['y']
+        serve_plus1_bounce_z = trajectory_data_list[serve_plus1_bounce_index]['z']
+    
+    except IndexError:
+        print('Tracking Data not available!')
+        
+        
+    return dict(
+        serve_plus1_bounce_x = serve_plus1_bounce_x,
+        serve_plus1_bounce_y = serve_plus1_bounce_y,
+        serve_plus1_bounce_z = serve_plus1_bounce_z)
     
 
 
