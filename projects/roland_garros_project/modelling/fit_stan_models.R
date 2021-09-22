@@ -108,6 +108,26 @@ atp_stan_datalist4 <- list(
   K = 3
 )
 
+
+atp_stan_datalist5 <- list(
+  N = nrow(atp_training_data),
+  num_players = length(unique(atp_training_data$server_index)),
+  y = atp_training_data$y,
+  player_id = atp_training_data$server_index,
+  x1 = atp_training_data$point_importance,
+  x2 = atp_training_data$serve_impact_from_center,
+  x3 = atp_training_data$distance_inside_serve,
+  x4 = atp_training_data$prev_intended_serve_loc1T,
+  x5 = atp_training_data$prev_intended_serve_loc1Wide,
+  x6 = atp_training_data$returner_backhand_locT,
+  x7 = atp_training_data$court_side_ad,
+  x8 = atp_training_data$server_handL,
+  x9 = atp_training_data$is_second_serve,
+  x10 = atp_training_data$interaction_s_hand_court_side,
+  x11 = atp_training_data$interaction_ss_bh_T,
+  K = 3
+)
+
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 ### =====                  FIT STAN MODEL                        =====
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
@@ -121,6 +141,11 @@ options(mc.cores = 4)
 atp_model1 <- stan_model('./modelling/stan_files/loglik_stan/loglik_model_1.stan')
 atp_model2 <- stan_model('./modelling/stan_files/loglik_stan/loglik_model_2.stan')
 atp_model4 <- stan_model('./modelling/stan_files/loglik_stan/loglik_model_4.stan')
+
+atp_model5 <- stan_model('./modelling/stan_files/loglik_stan/loglik_model_5.stan')
+
+
+
 
 # ~1 minute to run
 fit_atp_model1 <- sampling(atp_model1, 
@@ -142,6 +167,16 @@ saveRDS(fit_atp_model4, file = "./modelling/saved_models/stan_loglik/atp_loglik_
 
 summary(fit_atp_model4)
 
+# || --- || --- || --- || --- || --- || --- || --- || --- || 
+# -- Player varying intercept and (one)slope -----
+# || --- || --- || --- || --- || --- || --- || --- || --- || 
+# ~ ___ minutes
+fit_atp_model5 <- sampling(atp_model5, 
+                           data = atp_stan_datalist5, 
+                           iter = 2000)
+saveRDS(fit_atp_model5, file = "./modelling/saved_models/stan_loglik/atp_loglik_fit5.RDS")
+
+summary(fit_atp_model5)
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 ### =====                  COMPUTE ATP WAIC                       =====
@@ -153,15 +188,18 @@ stanfit4 <- readRDS("./modelling/saved_models/stan_loglik/atp_loglik_fit4.RDS")
 log_lik_1 <- extract_log_lik(stanfit1)
 log_lik_2 <- extract_log_lik(stanfit2)
 log_lik_4 <- extract_log_lik(stanfit4)
+log_lik_5 <- extract_log_lik(fit_atp_model5)
 
 waic1 <- waic(log_lik_1)
 waic2 <- waic(log_lik_2)
 waic4 <- waic(log_lik_4)
+waic5 <- waic(log_lik_5)
 
 print(waic1)
 print(waic2)
 print(waic4)
-print(loo_compare(waic1, waic2, waic4))
+print(waic5)
+print(loo_compare(waic1, waic2, waic4, waic5))
 print(loo_compare(waic4, waic2, waic1))
 
 # waic is -2*elpd_diff
